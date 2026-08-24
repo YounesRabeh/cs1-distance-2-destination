@@ -157,10 +157,12 @@ namespace RouteDistance.UI
 
             if (meters < 1000f)
             {
-                int roundedMeters = Mathf.RoundToInt(meters);
-                if (roundedMeters > 999)
+                int increment = meters > 100f ? 100 : meters > 50f ? 50 : 10;
+                int roundedMeters = Mathf.CeilToInt(meters / increment) * increment;
+
+                if (roundedMeters >= 1000)
                 {
-                    roundedMeters = 999;
+                    return (roundedMeters / 1000f).ToString("0.0", CultureInfo.InvariantCulture) + " km";
                 }
 
                 return roundedMeters.ToString(CultureInfo.InvariantCulture) + " m";
