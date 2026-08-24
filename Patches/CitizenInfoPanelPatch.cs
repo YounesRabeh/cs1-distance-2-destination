@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using ColossalFramework;
 using ColossalFramework.UI;
 using HarmonyLib;
@@ -13,6 +14,10 @@ namespace RouteDistance.Patches
     {
         private const float RefreshInterval = 0.75f;
 
+        private static readonly FieldInfo IsEmbeddedField =
+            AccessTools.Field(typeof(WorldInfoPanel), "m_IsEmbbeded");
+        private static readonly FieldInfo InstanceIdField =
+            AccessTools.Field(typeof(WorldInfoPanel), "m_InstanceID");
         private static readonly DistanceLabel Label = new DistanceLabel();
         private static uint lastCitizenId;
         private static float nextRefreshTime;
@@ -28,19 +33,24 @@ namespace RouteDistance.Patches
                     return;
                 }
 
-                UILabel status = __instance.Find<UILabel>("Status");
-                if (!Label.Attach(status))
+                InstanceID selected = WorldInfoPanel.GetCurrentInstanceID();
+                if (!RepresentsCurrentTopLevelCitizen(__instance, selected))
                 {
                     return;
                 }
 
-                InstanceID selected = WorldInfoPanel.GetCurrentInstanceID();
-                uint citizenId = selected.Type == InstanceType.Citizen ? selected.Citizen : 0u;
+                uint citizenId = selected.Citizen;
                 if (citizenId != lastCitizenId)
                 {
                     lastCitizenId = citizenId;
                     nextRefreshTime = 0f;
                     Label.SetUnavailable();
+                }
+
+                UILabel status = __instance.Find<UILabel>("Status");
+                if (!Label.Attach(status))
+                {
+                    return;
                 }
 
                 float now = Time.realtimeSinceStartup;
@@ -75,6 +85,33 @@ namespace RouteDistance.Patches
             Label.Remove();
             lastCitizenId = 0;
             nextRefreshTime = 0f;
+        }
+
+        private static bool RepresentsCurrentTopLevelCitizen(
+            CitizenWorldInfoPanel panel,
+            InstanceID selected)
+        {
+            if (selected.Type != InstanceType.Citizen || selected.Citizen == 0 ||
+                IsEmbeddedField == null || InstanceIdField == null)
+            {
+                return false;
+            }
+
+            object embeddedValue = IsEmbeddedField.GetValue(panel);
+            if (embeddedValue is bool && (bool)embeddedValue)
+            {
+                return false;
+            }
+
+            object panelValue = InstanceIdField.GetValue(panel);
+            if (!(panelValue is InstanceID))
+            {
+                return false;
+            }
+
+            InstanceID panelInstance = (InstanceID)panelValue;
+            return panelInstance.Type == InstanceType.Citizen &&
+                   panelInstance.Citizen == selected.Citizen;
         }
 
         private static ushort GetCitizenInstance(uint citizenId)

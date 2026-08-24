@@ -7,41 +7,64 @@ namespace RouteDistance.UI
 {
     public sealed class DistanceLabel
     {
+        private const string RowName = "RouteDistanceRow";
         private const string ComponentName = "RouteDistanceLabel";
         private const string Prefix = "Distance to destination: ";
         private const float VerticalSpacing = 2f;
 
         private UILabel label;
-        private UIComponent host;
-        private float originalHostHeight;
+        private UIPanel row;
+        private UIPanel container;
+        private UIComponent statusRow;
+        private float originalContainerHeight;
 
         public bool Attach(UILabel styleSource)
         {
-            if (styleSource == null || styleSource.parent == null)
+            if (styleSource == null || styleSource.parent == null ||
+                styleSource.parent.parent == null)
             {
                 return false;
             }
 
-            UIComponent requestedHost = styleSource.parent;
-            if (label != null && host == requestedHost)
+            UIComponent requestedStatusRow = styleSource.parent;
+            UIPanel requestedContainer = requestedStatusRow.parent as UIPanel;
+            if (requestedContainer == null)
             {
-                host.isVisible = true;
+                return false;
+            }
+
+            if (label != null && row != null &&
+                statusRow == requestedStatusRow && container == requestedContainer)
+            {
+                row.isVisible = true;
                 return true;
             }
 
             Remove();
 
-            host = requestedHost;
-            originalHostHeight = host.height;
+            statusRow = requestedStatusRow;
+            container = requestedContainer;
+            originalContainerHeight = container.height;
 
-            UILabel existing = host.Find<UILabel>(ComponentName);
-            if (existing != null)
+            UIPanel existing = container.Find<UIPanel>(RowName);
+            if (existing != null && existing.parent == container)
             {
-                host.RemoveUIComponent(existing);
+                container.RemoveUIComponent(existing);
                 UnityEngine.Object.Destroy(existing.gameObject);
             }
 
-            label = host.AddUIComponent<UILabel>();
+            row = container.AddUIComponent<UIPanel>();
+            row.name = RowName;
+            row.autoLayout = false;
+            row.width = statusRow.width;
+            row.height = Math.Max(styleSource.height, statusRow.height);
+            row.relativePosition = new Vector3(
+                statusRow.relativePosition.x,
+                statusRow.relativePosition.y + statusRow.height + VerticalSpacing,
+                statusRow.relativePosition.z);
+            row.zOrder = statusRow.zOrder + 1;
+
+            label = row.AddUIComponent<UILabel>();
             label.name = ComponentName;
             label.font = styleSource.font;
             label.textScale = styleSource.textScale;
@@ -54,19 +77,19 @@ namespace RouteDistance.UI
             label.height = Math.Max(styleSource.height, 20f);
             label.width = Math.Max(
                 styleSource.width,
-                host.width - styleSource.relativePosition.x - 8f);
+                row.width - styleSource.relativePosition.x - 8f);
             label.relativePosition = new Vector3(
                 styleSource.relativePosition.x,
-                styleSource.relativePosition.y + styleSource.height + VerticalSpacing,
+                styleSource.relativePosition.y,
                 styleSource.relativePosition.z);
 
-            float requiredHeight = label.relativePosition.y + label.height + VerticalSpacing;
-            if (host.height < requiredHeight)
+            float requiredHeight = row.relativePosition.y + row.height + VerticalSpacing;
+            if (container.height < requiredHeight)
             {
-                host.height = requiredHeight;
+                container.height = requiredHeight;
             }
 
-            host.isVisible = true;
+            row.isVisible = true;
             SetUnavailable();
             return true;
         }
@@ -81,9 +104,9 @@ namespace RouteDistance.UI
             string formatted = FormatDistance(meters);
             label.text = formatted == null ? Prefix + "—" : Prefix + formatted;
             label.isVisible = true;
-            if (host != null)
+            if (row != null)
             {
-                host.isVisible = true;
+                row.isVisible = true;
             }
         }
 
@@ -93,34 +116,36 @@ namespace RouteDistance.UI
             {
                 label.text = Prefix + "—";
                 label.isVisible = true;
-                if (host != null)
+                if (row != null)
                 {
-                    host.isVisible = true;
+                    row.isVisible = true;
                 }
             }
         }
 
         public void Remove()
         {
-            if (label != null)
+            if (row != null)
             {
-                UIComponent parent = label.parent;
+                UIComponent parent = row.parent;
                 if (parent != null)
                 {
-                    parent.RemoveUIComponent(label);
+                    parent.RemoveUIComponent(row);
                 }
 
-                UnityEngine.Object.Destroy(label.gameObject);
+                UnityEngine.Object.Destroy(row.gameObject);
             }
 
-            if (host != null && host.height > originalHostHeight)
+            if (container != null)
             {
-                host.height = originalHostHeight;
+                container.height = originalContainerHeight;
             }
 
             label = null;
-            host = null;
-            originalHostHeight = 0f;
+            row = null;
+            container = null;
+            statusRow = null;
+            originalContainerHeight = 0f;
         }
 
         public static string FormatDistance(float meters)
