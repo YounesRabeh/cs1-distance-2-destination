@@ -12,16 +12,16 @@ Route Distance is a Cities: Skylines 1 mod that shows how far a selected vehicle
 
 ## Requirements
 
-- Cities: Skylines 1 version 1.21.1-f9
+- Cities: Skylines 1 version 1.21.1-f9 or later
 - [Harmony 2.2.2-0 (Mod Dependency)](https://steamcommunity.com/sharedfiles/filedetails/?id=2040656402)
 
 Route Distance does not include Harmony itself. Subscribe to the Harmony dependency before using the mod.
 
 ## Using the mod
 
-Enable **Route Distance v1.1.0** in Content Manager, load a city, and select a moving road vehicle or pedestrian. The remaining distance appears below the normal activity line.
+Enable **Route Distance vx.x.x** in Content Manager, load a city, and select a moving road vehicle or pedestrian. The remaining distance appears below the normal activity line.
 
-Open **Options > Mods Settings > Route Distance v1.1.0** to choose what the mod displays and whether it uses metric or imperial units.
+Open **Options > Mods Settings > Route Distance vx.x.x** to choose what the mod displays and whether it uses metric or imperial units.
 
 ## Documentation
 
