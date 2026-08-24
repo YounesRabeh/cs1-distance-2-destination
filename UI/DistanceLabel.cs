@@ -16,12 +16,14 @@ namespace RouteDistance.UI
         private UIPanel row;
         private UIPanel container;
         private UIComponent statusRow;
+        private UIComponent infoPanel;
         private float originalContainerHeight;
+        private float originalInfoPanelHeight;
 
-        public bool Attach(UILabel styleSource)
+        public bool Attach(UILabel styleSource, UIComponent requestedInfoPanel)
         {
             if (styleSource == null || styleSource.parent == null ||
-                styleSource.parent.parent == null)
+                styleSource.parent.parent == null || requestedInfoPanel == null)
             {
                 return false;
             }
@@ -34,7 +36,8 @@ namespace RouteDistance.UI
             }
 
             if (label != null && row != null &&
-                statusRow == requestedStatusRow && container == requestedContainer)
+                statusRow == requestedStatusRow && container == requestedContainer &&
+                infoPanel == requestedInfoPanel)
             {
                 row.isVisible = true;
                 return true;
@@ -45,6 +48,8 @@ namespace RouteDistance.UI
             statusRow = requestedStatusRow;
             container = requestedContainer;
             originalContainerHeight = container.height;
+            infoPanel = requestedInfoPanel;
+            originalInfoPanelHeight = infoPanel.height;
 
             UIPanel existing = container.Find<UIPanel>(RowName);
             if (existing != null && existing.parent == container)
@@ -87,6 +92,13 @@ namespace RouteDistance.UI
             if (container.height < requiredHeight)
             {
                 container.height = requiredHeight;
+            }
+
+            float requiredInfoPanelHeight =
+                row.absolutePosition.y + row.height + VerticalSpacing - infoPanel.absolutePosition.y;
+            if (infoPanel.height < requiredInfoPanelHeight)
+            {
+                infoPanel.height = requiredInfoPanelHeight;
             }
 
             row.isVisible = true;
@@ -141,11 +153,18 @@ namespace RouteDistance.UI
                 container.height = originalContainerHeight;
             }
 
+            if (infoPanel != null)
+            {
+                infoPanel.height = originalInfoPanelHeight;
+            }
+
             label = null;
             row = null;
             container = null;
             statusRow = null;
+            infoPanel = null;
             originalContainerHeight = 0f;
+            originalInfoPanelHeight = 0f;
         }
 
         public static string FormatDistance(float meters)

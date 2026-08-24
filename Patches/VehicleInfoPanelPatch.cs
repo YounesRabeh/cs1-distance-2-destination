@@ -11,6 +11,7 @@ namespace RouteDistance.Patches
     internal static class VehicleInfoPanelPatch
     {
         private const float RefreshInterval = 0.75f;
+        private const float StationaryVelocitySquared = 0.0001f;
 
         private static readonly DistanceLabel Label = new DistanceLabel();
         private static ushort lastVehicleId;
@@ -30,8 +31,11 @@ namespace RouteDistance.Patches
                 InstanceID selected = WorldInfoPanel.GetCurrentInstanceID();
                 ushort vehicleId = selected.Type == InstanceType.Vehicle ? selected.Vehicle : (ushort)0;
                 vehicleId = GetFirstVehicle(vehicleId);
+                UILabel status = __instance.Find<UILabel>("Status");
 
-                if (vehicleId == 0 || IsParkedVehicle(vehicleId))
+                if (vehicleId == 0 || IsParkedVehicle(
+                    vehicleId,
+                    status == null ? null : status.text))
                 {
                     Label.Remove();
                     lastVehicleId = vehicleId;
@@ -46,8 +50,7 @@ namespace RouteDistance.Patches
                     Label.SetUnavailable();
                 }
 
-                UILabel status = __instance.Find<UILabel>("Status");
-                if (!Label.Attach(status))
+                if (!Label.Attach(status, __instance.component))
                 {
                     return;
                 }
@@ -103,7 +106,7 @@ namespace RouteDistance.Patches
             return manager.m_vehicles.m_buffer[vehicleId].GetFirstVehicle(vehicleId);
         }
 
-        private static bool IsParkedVehicle(ushort vehicleId)
+        private static bool IsParkedVehicle(ushort vehicleId, string statusText)
         {
             if (vehicleId == 0 || !ColossalFramework.Singleton<VehicleManager>.exists)
             {
@@ -118,7 +121,13 @@ namespace RouteDistance.Patches
                 return false;
             }
 
-            return (manager.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.Parking) != 0;
+            Vehicle vehicle = manager.m_vehicles.m_buffer[vehicleId];
+            Vector3 velocity = vehicle.GetLastFrameVelocity();
+            bool isStationary = velocity.sqrMagnitude <= StationaryVelocitySquared;
+            bool isParking = (vehicle.m_flags & Vehicle.Flags.Parking) != 0;
+            bool statusSaysParked = !string.IsNullOrEmpty(statusText) &&
+                                    statusText.IndexOf("Parked", StringComparison.OrdinalIgnoreCase) >= 0;
+            return isStationary && (isParking || statusSaysParked);
         }
     }
 }

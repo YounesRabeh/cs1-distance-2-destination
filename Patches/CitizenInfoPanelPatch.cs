@@ -39,6 +39,15 @@ namespace RouteDistance.Patches
                     return;
                 }
 
+                UILabel status = __instance.Find<UILabel>("Status");
+                if (status == null || string.IsNullOrEmpty(status.text))
+                {
+                    Label.Remove();
+                    lastCitizenId = 0;
+                    nextRefreshTime = 0f;
+                    return;
+                }
+
                 uint citizenId = selected.Citizen;
                 if (citizenId != lastCitizenId)
                 {
@@ -47,8 +56,7 @@ namespace RouteDistance.Patches
                     Label.SetUnavailable();
                 }
 
-                UILabel status = __instance.Find<UILabel>("Status");
-                if (!Label.Attach(status))
+                if (!Label.Attach(status, __instance.component))
                 {
                     return;
                 }
