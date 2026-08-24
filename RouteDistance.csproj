@@ -34,6 +34,7 @@
     <CitiesSkylinesManagedDir Condition=" '$(CitiesSkylinesManagedDir)' == '' and Exists('$(HOME)/Library/Application Support/Steam/steamapps/common/Cities_Skylines/Cities.app/Contents/Resources/Cities_Data/Managed/Assembly-CSharp.dll') ">$(HOME)/Library/Application Support/Steam/steamapps/common/Cities_Skylines/Cities.app/Contents/Resources/Cities_Data/Managed</CitiesSkylinesManagedDir>
     <CitiesSkylinesManagedDir Condition=" '$(CitiesSkylinesManagedDir)' == '' and Exists('$(ProgramFiles(x86))/Steam/steamapps/common/Cities_Skylines/Cities_Data/Managed/Assembly-CSharp.dll') ">$(ProgramFiles(x86))/Steam/steamapps/common/Cities_Skylines/Cities_Data/Managed</CitiesSkylinesManagedDir>
     <HarmonyDllPath Condition=" '$(HarmonyDllPath)' == '' and Exists('$(HOME)/.local/share/Steam/steamapps/workshop/content/255710/2040656402/CitiesHarmony.Harmony.dll') ">$(HOME)/.local/share/Steam/steamapps/workshop/content/255710/2040656402/CitiesHarmony.Harmony.dll</HarmonyDllPath>
+    <CitiesHarmonyApiDllPath Condition=" '$(CitiesHarmonyApiDllPath)' == '' ">$(MSBuildProjectDirectory)/packages/CitiesHarmony.API.2.2.0/lib/net35/CitiesHarmony.API.dll</CitiesHarmonyApiDllPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -58,6 +59,10 @@
       <HintPath>$(HarmonyDllPath)</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="CitiesHarmony.API">
+      <HintPath>$(CitiesHarmonyApiDllPath)</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
@@ -71,6 +76,7 @@
     <Compile Include="Distance/PathDistanceCalculator.cs" />
     <Compile Include="Distance/PathHelpers.cs" />
     <Compile Include="UI/DistanceLabel.cs" />
+    <None Include="packages.config" />
   </ItemGroup>
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -86,6 +92,10 @@
            Text="Missing ICities.dll under CitiesSkylinesManagedDir=$(CitiesSkylinesManagedDir)" />
     <Error Condition="!Exists('$(CitiesSkylinesManagedDir)/UnityEngine.dll')"
            Text="Missing UnityEngine.dll under CitiesSkylinesManagedDir=$(CitiesSkylinesManagedDir)" />
+    <Error Condition=" '$(HarmonyDllPath)' == '' or !Exists('$(HarmonyDllPath)')"
+           Text="Missing the installed Harmony 2.2.2-0 dependency. Configure HarmonyDllPath to CitiesHarmony.Harmony.dll." />
+    <Error Condition="!Exists('$(CitiesHarmonyApiDllPath)')"
+           Text="Missing CitiesHarmony.API 2.2.0. Restore packages.config or configure CitiesHarmonyApiDllPath." />
   </Target>
 
   <!-- Classic xbuild invokes this conventional hook; modern MSBuild uses BeforeTargets above. -->
@@ -100,6 +110,9 @@
     <Copy SourceFiles="$(TargetPath).mdb"
           DestinationFolder="$(ModOutputDir)"
           Condition="Exists('$(TargetPath).mdb')" />
+    <Copy SourceFiles="$(TargetDir)CitiesHarmony.API.dll"
+          DestinationFolder="$(ModOutputDir)"
+          Condition="Exists('$(TargetDir)CitiesHarmony.API.dll')" />
   </Target>
 
   <!-- Conventional hooks keep the project functional on CS1's older bundled xbuild. -->

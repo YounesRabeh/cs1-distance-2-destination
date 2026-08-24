@@ -104,9 +104,10 @@ namespace RouteDistance.Distance
                     pathId = unit.m_nextPathUnit;
                 }
             }
-            catch (Exception)
+            catch (Exception exception)
             {
                 // Simulation buffers are mutable. A transient invalidation is an unavailable result.
+                PathDistanceCalculator.LogUnexpected(exception);
                 return false;
             }
 
@@ -201,8 +202,9 @@ namespace RouteDistance.Distance
                 meters = total;
                 return true;
             }
-            catch (Exception)
+            catch (Exception exception)
             {
+                PathDistanceCalculator.LogUnexpected(exception);
                 meters = 0f;
                 return false;
             }

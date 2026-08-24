@@ -1,4 +1,4 @@
-# Assembly investigation and distance model (Phases 1-7)
+# Assembly investigation, distance model, and v1 verification
 
 ## Scope and target version
 
@@ -12,7 +12,7 @@ The inspected files are the assemblies actually installed under:
 
 The inspection used the game's bundled Mono.Cecil against `Assembly-CSharp.dll`; it did not use recreated API definitions or third-party documentation.
 
-The installed patching dependency is the Workshop release **Harmony 2.2.2-0 (Mod Dependency)**, which provides HarmonyLib 2.2.2. Its `CitiesHarmony.Harmony.dll` reports managed assembly version `2.0.4.0`; these are different version identifiers. Harmony integration remains deferred to Phase 15, and the dependency assembly is never copied into Route Distance's output.
+The installed patching dependency is the Workshop release **Harmony 2.2.2-0 (Mod Dependency)**, which provides HarmonyLib 2.2.2. Its `CitiesHarmony.Harmony.dll` reports managed assembly version `2.0.4.0`; these are different version identifiers. Lifecycle initialization uses the official CitiesHarmony.API 2.2.0 package. The API helper is deployed with Route Distance; the centrally provided Harmony implementation is not copied.
 
 ## World-info panels
 
@@ -26,7 +26,7 @@ The installed patching dependency is the Workshop release **Harmony 2.2.2-0 (Mod
 - Private `WorldInfoPanel.LateUpdate()` returns when hidden; while visible it updates the position and calls virtual `UpdateBindings()`.
 - `WorldInfoPanel.OnVisibilityChanged()` records/removes the last visible panel. `OnHide()` is an available virtual close hook, and `ClearTarget()` replaces `m_InstanceID` with `InstanceID.Empty`.
 - The selected vehicle is `m_InstanceID.Vehicle` (`ushort`) when `m_InstanceID.Type == InstanceType.Vehicle`. Vehicle variants call `Vehicle.GetFirstVehicle()` before presenting the first vehicle of a consist.
-- Safe future insertion point: the existing panel root (`WorldInfoPanel.component`). For vanilla-aligned placement, `VehicleWorldInfoPanel.m_Status.parent` is the confirmed existing content container/row parent and `m_Status` is a confirmed style source. No UI integration is implemented through Phase 7.
+- `VehicleWorldInfoPanel.UpdateBindings()` is patched with a postfix. The label uses the existing `Status` label as its typography/position source and expands that vanilla row rather than creating another window.
 
 ### Citizens
 
@@ -35,7 +35,7 @@ The installed patching dependency is the Workshop release **Harmony 2.2.2-0 (Mod
 - The panel target is a `Citizen` ID (`m_InstanceID.Citizen`, `uint`), not a `CitizenInstance` ID.
 - `Citizen.m_instance` (`ushort`) is the active moving instance. A safe conversion is: validate the citizen buffer entry, read `m_instance`, validate the instance buffer entry, and require `CitizenInstance.m_citizen` to point back to the same citizen.
 - `Citizen.m_vehicle` (`ushort`) identifies a current vehicle. Vanilla's `HumanAI.SetCurrentVehicle` unspawns the `CitizenInstance`; resident/tourist vehicle spawning transfers the active path/progress to `Vehicle`, then clears `CitizenInstance.m_path`. Passenger-car/taxi parking assigns a path back to the citizen instance. A selected citizen can therefore temporarily have no meaningful walking path while entering or riding a vehicle.
-- `HumanWorldInfoPanel` has a protected `UILabel m_Status`; its parent is the confirmed existing content container/style source for a future citizen label. No UI integration is implemented through Phase 7.
+- `HumanWorldInfoPanel` has a protected `UILabel m_Status`; public `Find<UILabel>("Status")` provides the same style source without reflection. `CitizenWorldInfoPanel.UpdateBindings()` is patched with a postfix.
 
 ## Entity path state and current progress
 
@@ -99,9 +99,19 @@ Every lane, segment, offset-derived position, and accumulated float is validated
 
 ## Mutable-state and thread observations
 
-- The chosen future binding callback is Unity's visible-panel `LateUpdate` path, i.e. the Unity/UI main thread.
+- The chosen binding callback is Unity's visible-panel `LateUpdate` path, i.e. the Unity/UI main thread.
 - Vanilla `PathVisualizer` itself reads the same vehicle, citizen, path, segment, and lane buffers for display from a Unity component. This supports a small read-only UI-thread snapshot in normal CS1 practice.
-- The buffers remain simulation-owned and mutable. Phase 3-7 code validates IDs before every chain dereference, copies structs, checks unit identity again after reading, and rejects the result if the selected entity's path/progress changes before completion. It does not lock game buffers, add path references, or mutate simulation state.
+- The buffers remain simulation-owned and mutable. The calculator validates IDs before every chain dereference, copies structs, checks unit identity again after reading, and rejects the result if the selected entity's path/progress changes before completion. It does not lock game buffers, add path references, or mutate simulation state.
+
+## UI refresh and Harmony lifecycle
+
+- Each supported panel postfix first verifies that its own component is visible. Vanilla's `LateUpdate` does not call `UpdateBindings` for a hidden panel, so closing the panel stops calculations.
+- The selected ID is reread through public `WorldInfoPanel.GetCurrentInstanceID()` on every scheduled refresh. No path geometry or path ID is cached; reroutes naturally use the entity's current `m_path`.
+- A per-panel timer limits calculation to once every 0.75 seconds. Only the selected vehicle or citizen instance is processed.
+- Target changes immediately reset the field to `—` and allow an immediate recalculation.
+- The label copies the existing Status label's font, scale, colors, alignment, and height. Attachment is idempotent, and cleanup removes the component and restores the host-row height.
+- `Mod.OnEnabled` asks `HarmonyHelper` to ensure the dependency is available. `LoadingExtension.OnCreated` applies patches only after `IsHarmonyInstalled`; `OnReleased` and `Mod.OnDisabled` remove only patches owned by `com.routedistance.cs1`.
+- Unexpected exceptions are isolated at UI/calculator boundaries and logged at most once per 30 seconds. Normal unavailable/transient path states are not logged.
 
 ## Phase 1 exit-gate summary
 
@@ -119,4 +129,33 @@ Every lane, segment, offset-derived position, and accumulated float is validated
 | `PathUnit.m_length` | search bound, then mode-dependent method distance/duration; not physical route length |
 | Panel integration | root component; status-label parent is confirmed content/style source |
 
-All structural and Phase 5-7 calculation questions are answered for the targeted, locally installed **1.21.1-f9** assembly.
+All structural and calculation questions are answered for the targeted, locally installed **1.21.1-f9** assembly.
+
+## v1 acceptance verification
+
+Automated on the installed target:
+
+| Criterion group | Evidence | Status |
+|---|---|---|
+| Build and dependency resolution | Release build against CS1 1.21.1-f9, CitiesHarmony.API 2.2.0, and installed Harmony 2.2.2 | Pass (one expected ICities 1.16/1.17 unification warning from the official API package) |
+| Assembly load | Built assembly and all eight Route Distance types load under the game's Mono runtime | Pass |
+| Harmony targets/lifecycle | Both exact `UpdateBindings` targets exist; owner ID is unique; unpatch is owner-scoped | Pass by assembly inspection |
+| Formatting | Tests for 0 m, sub-kilometer values, 1.0+ km, one decimal, negative/NaN/infinity | Pass |
+| Existing route only | Compiled IL contains no `CreatePath`, `ReleasePath`, `AddPathReference`, `SetPosition`, `FindPathPosition`, `StartPathFind`, or pathfinding `CalculatePath` call | Pass |
+| Read-only simulation | Compiled IL contains no write to Vehicle, Citizen, CitizenInstance, PathUnit, NetLane, NetSegment, or manager fields | Pass |
+| Route geometry/current progress | Lane lengths, offsets, transition endpoints, and current-world projection are present; no straight-line origin-to-destination calculation exists | Pass by code/IL inspection |
+| Performance scope | Loops are restricted to the selected route's bounded PathUnit/position chain; no manager-wide scan or background service exists | Pass by source inspection |
+| Packaging | Output contains RouteDistance, its symbols, and CitiesHarmony.API only; no game or Harmony implementation DLL | Pass |
+| DLC independence/separate window | Only base-game assemblies are referenced; the mod adds a label inside vanilla panels | Pass by project/source inspection |
+
+Requires an actual running city and remains pending manual verification:
+
+- mod discovery/load and Harmony patch application/removal in the CS1 log
+- vehicle and citizen label layout at different UI scales
+- short, long, curved, ramp, bridge, pedestrian, and multi-transition route accuracy
+- values decreasing during ordinary movement and changing safely after reroutes
+- mid-lane selection, arrival/path release, and released/reused PathUnit behavior
+- citizen entering, riding, and leaving vehicles
+- confirmation that hidden panels produce no refresh work in a live Unity profiler/log-assisted test
+
+Until that matrix is exercised in game, the implementation is code-complete but the runtime-dependent acceptance items are not claimed as verified.

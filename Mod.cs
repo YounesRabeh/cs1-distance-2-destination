@@ -1,3 +1,4 @@
+using CitiesHarmony.API;
 using ICities;
 
 namespace RouteDistance
@@ -12,6 +13,19 @@ namespace RouteDistance
         public string Description
         {
             get { return "Shows the remaining distance along a selected citizen or road vehicle's existing route."; }
+        }
+
+        public void OnEnabled()
+        {
+            HarmonyHelper.EnsureHarmonyInstalled();
+        }
+
+        public void OnDisabled()
+        {
+            if (HarmonyHelper.IsHarmonyInstalled)
+            {
+                Patcher.UnpatchAll();
+            }
         }
     }
 }

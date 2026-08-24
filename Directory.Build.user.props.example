@@ -7,6 +7,9 @@
     <!-- Harmony 2.2.2-0 (Mod Dependency); referenced with Private=False. -->
     <HarmonyDllPath>/path/to/CitiesHarmony.Harmony.dll</HarmonyDllPath>
 
+    <!-- Optional override after restoring the CitiesHarmony.API 2.2.0 package. -->
+    <CitiesHarmonyApiDllPath>/path/to/CitiesHarmony.API.dll</CitiesHarmonyApiDllPath>
+
     <!-- Optional build/deployment overrides. -->
     <BuildOutputRoot>/path/to/temporary/RouteDistance-build</BuildOutputRoot>
     <ModOutputDir>/path/to/Cities_Skylines/Addons/Mods/RouteDistance</ModOutputDir>

@@ -7,6 +7,9 @@ namespace RouteDistance.Distance
 {
     public static class PathDistanceCalculator
     {
+        private const float UnexpectedLogInterval = 30f;
+        private static float nextUnexpectedLogTime;
+
         public static bool TryGetVehicleRemainingDistance(ushort vehicleId, out float meters)
         {
             meters = 0f;
@@ -102,8 +105,9 @@ namespace RouteDistance.Distance
                 worldPosition = current.GetLastFramePosition();
                 return true;
             }
-            catch (Exception)
+            catch (Exception exception)
             {
+                LogUnexpected(exception);
                 positions = null;
                 pathPositionIndex = 0;
                 worldPosition = Vector3.zero;
@@ -160,13 +164,32 @@ namespace RouteDistance.Distance
                 worldPosition = current.GetLastFramePosition();
                 return true;
             }
-            catch (Exception)
+            catch (Exception exception)
             {
+                LogUnexpected(exception);
                 positions = null;
                 pathPositionIndex = 0;
                 worldPosition = Vector3.zero;
                 return false;
             }
+        }
+
+        internal static void LogUnexpected(Exception exception)
+        {
+            if (exception == null)
+            {
+                return;
+            }
+
+            float now = Time.realtimeSinceStartup;
+            if (now < nextUnexpectedLogTime)
+            {
+                return;
+            }
+
+            nextUnexpectedLogTime = now + UnexpectedLogInterval;
+            Debug.LogError("[Route Distance] Unexpected calculator/UI exception (rate limited)");
+            Debug.LogException(exception);
         }
 
         private static bool IsSupportedVehicle(Vehicle vehicle)
