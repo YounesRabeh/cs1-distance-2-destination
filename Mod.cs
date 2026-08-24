@@ -5,9 +5,11 @@ namespace RouteDistance
 {
     public sealed class Mod : IUserMod
     {
+        private const string Version = "1.0.0";
+
         public string Name
         {
-            get { return "Route Distance"; }
+            get { return "Route Distance v" + Version; }
         }
 
         public string Description

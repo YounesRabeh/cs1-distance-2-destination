@@ -40,7 +40,8 @@ namespace RouteDistance.Patches
                 }
 
                 UILabel status = __instance.Find<UILabel>("Status");
-                if (status == null || string.IsNullOrEmpty(status.text))
+                if (status == null || string.IsNullOrEmpty(status.text) ||
+                    !status.text.StartsWith("Going", StringComparison.OrdinalIgnoreCase))
                 {
                     Label.Remove();
                     lastCitizenId = 0;

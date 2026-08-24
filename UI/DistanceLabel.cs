@@ -11,6 +11,7 @@ namespace RouteDistance.UI
         private const string ComponentName = "RouteDistanceLabel";
         private const string Prefix = "Distance to destination: ";
         private const float VerticalSpacing = 2f;
+        private const float InfoPanelBottomPadding = 8f;
 
         private UILabel label;
         private UIPanel row;
@@ -95,7 +96,7 @@ namespace RouteDistance.UI
             }
 
             float requiredInfoPanelHeight =
-                row.absolutePosition.y + row.height + VerticalSpacing - infoPanel.absolutePosition.y;
+                row.absolutePosition.y + row.height + InfoPanelBottomPadding - infoPanel.absolutePosition.y;
             if (infoPanel.height < requiredInfoPanelHeight)
             {
                 infoPanel.height = requiredInfoPanelHeight;
