@@ -1,3 +1,5 @@
+// Adds a route-distance row to top-level moving-citizen information panels.
+// Ignores embedded owner panels so vehicle windows never receive a duplicate label.
 using System;
 using System.Reflection;
 using ColossalFramework;
@@ -9,6 +11,9 @@ using UnityEngine;
 
 namespace RouteDistance.Patches
 {
+    /// <summary>
+    /// Refreshes the citizen distance row after vanilla binds its information panel.
+    /// </summary>
     [HarmonyPatch(typeof(CitizenWorldInfoPanel), "UpdateBindings")]
     internal static class CitizenInfoPanelPatch
     {
@@ -89,6 +94,9 @@ namespace RouteDistance.Patches
             }
         }
 
+        /// <summary>
+        /// Removes the citizen row and resets its refresh state.
+        /// </summary>
         internal static void Cleanup()
         {
             Label.Remove();

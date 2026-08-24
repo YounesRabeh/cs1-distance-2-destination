@@ -1,3 +1,5 @@
+// Provides safe entry points for reading remaining distances from live game entities.
+// Validates mutable simulation data before delegating geometry work to PathHelpers.
 using System;
 using System.Collections.Generic;
 using ColossalFramework;
@@ -5,11 +7,17 @@ using UnityEngine;
 
 namespace RouteDistance.Distance
 {
+    /// <summary>
+    /// Reads existing vehicle and pedestrian paths and calculates their remaining length.
+    /// </summary>
     public static class PathDistanceCalculator
     {
         private const float UnexpectedLogInterval = 30f;
         private static float nextUnexpectedLogTime;
 
+        /// <summary>
+        /// Attempts to calculate the remaining route distance for a spawned road vehicle.
+        /// </summary>
         public static bool TryGetVehicleRemainingDistance(ushort vehicleId, out float meters)
         {
             meters = 0f;
@@ -33,6 +41,9 @@ namespace RouteDistance.Distance
                 out meters);
         }
 
+        /// <summary>
+        /// Attempts to calculate the remaining route distance for a walking citizen instance.
+        /// </summary>
         public static bool TryGetCitizenRemainingDistance(ushort citizenInstanceId, out float meters)
         {
             meters = 0f;
@@ -56,6 +67,9 @@ namespace RouteDistance.Distance
                 out meters);
         }
 
+        /// <summary>
+        /// Captures a consistent vehicle-path snapshot and its current world position.
+        /// </summary>
         internal static bool TryGetVehicleRemainingPath(
             ushort vehicleId,
             out List<PathUnit.Position> positions,
@@ -115,6 +129,9 @@ namespace RouteDistance.Distance
             }
         }
 
+        /// <summary>
+        /// Captures a consistent pedestrian-path snapshot and its current world position.
+        /// </summary>
         internal static bool TryGetCitizenRemainingPath(
             ushort citizenInstanceId,
             out List<PathUnit.Position> positions,
@@ -174,6 +191,9 @@ namespace RouteDistance.Distance
             }
         }
 
+        /// <summary>
+        /// Logs an unexpected read or UI error at a bounded rate.
+        /// </summary>
         internal static void LogUnexpected(Exception exception)
         {
             if (exception == null)

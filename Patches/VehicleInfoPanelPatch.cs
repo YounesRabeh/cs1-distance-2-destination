@@ -1,3 +1,5 @@
+// Adds a route-distance row to active road-vehicle information panels.
+// Removes that row for stationary parked vehicles that have no active trip to show.
 using System;
 using ColossalFramework.UI;
 using HarmonyLib;
@@ -7,6 +9,9 @@ using UnityEngine;
 
 namespace RouteDistance.Patches
 {
+    /// <summary>
+    /// Refreshes the vehicle distance row after vanilla binds its information panel.
+    /// </summary>
     [HarmonyPatch(typeof(VehicleWorldInfoPanel), "UpdateBindings")]
     internal static class VehicleInfoPanelPatch
     {
@@ -81,6 +86,9 @@ namespace RouteDistance.Patches
             }
         }
 
+        /// <summary>
+        /// Removes the vehicle row and resets its refresh state.
+        /// </summary>
         internal static void Cleanup()
         {
             Label.Remove();

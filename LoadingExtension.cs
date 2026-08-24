@@ -1,11 +1,19 @@
+// Owns the game-loading lifecycle for Route Distance.
+// Applies patches after Harmony is available and removes them when the level is released.
 using CitiesHarmony.API;
 using ICities;
 using UnityEngine;
 
 namespace RouteDistance
 {
+    /// <summary>
+    /// Connects Route Distance's Harmony lifecycle to Cities: Skylines level loading.
+    /// </summary>
     public sealed class LoadingExtension : LoadingExtensionBase
     {
+        /// <summary>
+        /// Applies the mod patches when a level loading extension is created.
+        /// </summary>
         public override void OnCreated(ILoading loading)
         {
             Debug.Log("[Route Distance] Loaded");
@@ -19,6 +27,9 @@ namespace RouteDistance
             }
         }
 
+        /// <summary>
+        /// Removes the mod patches when the level loading extension is released.
+        /// </summary>
         public override void OnReleased()
         {
             if (HarmonyHelper.IsHarmonyInstalled)

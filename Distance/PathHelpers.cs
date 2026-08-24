@@ -1,3 +1,5 @@
+// Traverses vanilla PathUnit chains and converts their lane positions into physical distance.
+// All helpers treat mutable or malformed simulation data as an unavailable route.
 using System;
 using System.Collections.Generic;
 using ColossalFramework;
@@ -5,10 +7,16 @@ using UnityEngine;
 
 namespace RouteDistance.Distance
 {
+    /// <summary>
+    /// Contains bounded, defensive path traversal and lane-distance calculations.
+    /// </summary>
     internal static class PathHelpers
     {
         internal const int MaxPathUnits = 4096;
 
+        /// <summary>
+        /// Collects the remaining positions in a ready PathUnit chain without mutating it.
+        /// </summary>
         internal static bool TryGetRemainingPositions(
             uint initialPathId,
             byte encodedPositionIndex,
@@ -114,6 +122,9 @@ namespace RouteDistance.Distance
             return false;
         }
 
+        /// <summary>
+        /// Calculates distance from the current position through the supplied remaining path positions.
+        /// </summary>
         internal static bool TryCalculateRemainingDistance(
             IList<PathUnit.Position> positions,
             byte encodedPositionIndex,

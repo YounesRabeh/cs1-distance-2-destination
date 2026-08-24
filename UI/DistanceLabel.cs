@@ -1,3 +1,5 @@
+// Creates, updates, and removes the Route Distance row in vanilla information panels.
+// Preserves panel layout by restoring every size changed when the row is removed.
 using System;
 using System.Globalization;
 using ColossalFramework.UI;
@@ -5,6 +7,9 @@ using UnityEngine;
 
 namespace RouteDistance.UI
 {
+    /// <summary>
+    /// Owns a vanilla-styled distance row and the panel sizing required to display it.
+    /// </summary>
     public sealed class DistanceLabel
     {
         private const string RowName = "RouteDistanceRow";
@@ -21,6 +26,9 @@ namespace RouteDistance.UI
         private float originalContainerHeight;
         private float originalInfoPanelHeight;
 
+        /// <summary>
+        /// Attaches one styled distance row below the supplied vanilla Status row.
+        /// </summary>
         public bool Attach(UILabel styleSource, UIComponent requestedInfoPanel)
         {
             if (styleSource == null || styleSource.parent == null ||
@@ -107,6 +115,9 @@ namespace RouteDistance.UI
             return true;
         }
 
+        /// <summary>
+        /// Displays a valid remaining distance using the mod's rounded presentation rules.
+        /// </summary>
         public void SetDistance(float meters)
         {
             if (label == null)
@@ -123,6 +134,9 @@ namespace RouteDistance.UI
             }
         }
 
+        /// <summary>
+        /// Displays the unavailable marker for a transient or missing route.
+        /// </summary>
         public void SetUnavailable()
         {
             if (label != null)
@@ -136,6 +150,9 @@ namespace RouteDistance.UI
             }
         }
 
+        /// <summary>
+        /// Removes the owned UI row and restores the original container and panel heights.
+        /// </summary>
         public void Remove()
         {
             if (row != null)
@@ -168,6 +185,9 @@ namespace RouteDistance.UI
             originalInfoPanelHeight = 0f;
         }
 
+        /// <summary>
+        /// Formats meters as an upward-rounded metric distance suitable for the info panel.
+        /// </summary>
         public static string FormatDistance(float meters)
         {
             if (float.IsNaN(meters) || float.IsInfinity(meters) || meters < 0f)

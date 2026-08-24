@@ -1,3 +1,5 @@
+// Applies and removes Route Distance's owner-scoped Harmony patches.
+// Centralizes UI cleanup so disabling the mod restores vanilla panels.
 using System;
 using HarmonyLib;
 using RouteDistance.Patches;
@@ -5,12 +7,18 @@ using UnityEngine;
 
 namespace RouteDistance
 {
+    /// <summary>
+    /// Manages idempotent Harmony patching and cleanup for the mod lifetime.
+    /// </summary>
     internal static class Patcher
     {
         internal const string HarmonyId = "com.routedistance.cs1";
 
         private static bool patched;
 
+        /// <summary>
+        /// Applies all patches in this assembly once.
+        /// </summary>
         internal static void PatchAll()
         {
             if (patched)
@@ -45,6 +53,9 @@ namespace RouteDistance
             }
         }
 
+        /// <summary>
+        /// Removes this mod's patches and any labels created by them.
+        /// </summary>
         internal static void UnpatchAll()
         {
             if (!patched)
