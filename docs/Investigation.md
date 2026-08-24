@@ -110,6 +110,7 @@ Every lane, segment, offset-derived position, and accumulated float is validated
 - A per-panel timer limits calculation to once every 0.75 seconds. Only the selected vehicle or citizen instance is processed.
 - Target changes immediately reset the field to `—` and allow an immediate recalculation.
 - The label copies the existing Status label's font, scale, colors, alignment, and height. Attachment is idempotent, and cleanup removes the component and restores the host-row height.
+- The options menu stores independent, default-enabled visibility settings for city-service vehicles, all other road vehicles, and pedestrians. A persisted dropdown switches display formatting between metric metres/kilometres and imperial feet/miles without changing the underlying metre calculation.
 - `Mod.OnEnabled` asks `HarmonyHelper` to ensure the dependency is available. `LoadingExtension.OnCreated` applies patches only after `IsHarmonyInstalled`; `OnReleased` and `Mod.OnDisabled` remove only patches owned by `com.routedistance.cs1`.
 - Unexpected exceptions are isolated at UI/calculator boundaries and logged at most once per 30 seconds. Normal unavailable/transient path states are not logged.
 

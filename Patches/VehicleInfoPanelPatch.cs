@@ -36,6 +36,14 @@ namespace RouteDistance.Patches
                     return;
                 }
 
+                if (!ShouldShowForPanel(__instance))
+                {
+                    Label.Remove();
+                    lastVehicleId = 0;
+                    nextRefreshTime = 0f;
+                    return;
+                }
+
                 InstanceID selected = WorldInfoPanel.GetCurrentInstanceID();
                 ushort vehicleId = selected.Type == InstanceType.Vehicle ? selected.Vehicle : (ushort)0;
                 vehicleId = GetFirstVehicle(vehicleId);
@@ -97,6 +105,16 @@ namespace RouteDistance.Patches
             Label.Remove();
             lastVehicleId = 0;
             nextRefreshTime = 0f;
+        }
+
+        /// <summary>
+        /// Applies the service or other-vehicle preference for the active panel type.
+        /// </summary>
+        private static bool ShouldShowForPanel(VehicleWorldInfoPanel panel)
+        {
+            return panel is CityServiceVehicleWorldInfoPanel
+                ? ModSettings.ShowServiceVehicles
+                : ModSettings.ShowOtherVehicles;
         }
 
         /// <summary>

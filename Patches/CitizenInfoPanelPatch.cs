@@ -41,6 +41,14 @@ namespace RouteDistance.Patches
                     return;
                 }
 
+                if (!ModSettings.ShowPedestrians)
+                {
+                    Label.Remove();
+                    lastCitizenId = 0;
+                    nextRefreshTime = 0f;
+                    return;
+                }
+
                 InstanceID selected = WorldInfoPanel.GetCurrentInstanceID();
                 if (!RepresentsCurrentTopLevelCitizen(__instance, selected))
                 {

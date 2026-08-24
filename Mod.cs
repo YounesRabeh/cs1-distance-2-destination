@@ -10,7 +10,7 @@ namespace RouteDistance
     /// </summary>
     public sealed class Mod : IUserMod
     {
-        private const string Version = "1.0.0";
+        private const string Version = "1.1.0";
 
         /// <summary>
         /// Gets the versioned name displayed by Content Manager.
@@ -33,6 +33,7 @@ namespace RouteDistance
         /// </summary>
         public void OnEnabled()
         {
+            ModSettings.EnsureSettingsFile();
             HarmonyHelper.EnsureHarmonyInstalled();
         }
 
@@ -45,6 +46,37 @@ namespace RouteDistance
             {
                 Patcher.UnpatchAll();
             }
+        }
+
+        /// <summary>
+        /// Builds the Route Distance options shown in the game's Mods Settings menu.
+        /// </summary>
+        public void OnSettingsUI(UIHelperBase helper)
+        {
+            ModSettings.EnsureSettingsFile();
+
+            UIHelperBase visibilityGroup = helper.AddGroup("Show distance for");
+            visibilityGroup.AddCheckbox(
+                "Service vehicles",
+                ModSettings.ShowServiceVehicles,
+                delegate(bool value) { ModSettings.ShowServiceVehicles = value; });
+            visibilityGroup.AddCheckbox(
+                "All other vehicles",
+                ModSettings.ShowOtherVehicles,
+                delegate(bool value) { ModSettings.ShowOtherVehicles = value; });
+            visibilityGroup.AddCheckbox(
+                "Pedestrians",
+                ModSettings.ShowPedestrians,
+                delegate(bool value) { ModSettings.ShowPedestrians = value; });
+
+            helper.AddSpace(12);
+
+            UIHelperBase unitGroup = helper.AddGroup("Units");
+            unitGroup.AddDropdown(
+                "Distance units",
+                new[] { "Metric (m, km)", "Imperial (ft, mi)" },
+                ModSettings.UnitSelection,
+                delegate(int selection) { ModSettings.UseImperial = selection == 1; });
         }
     }
 }

@@ -17,6 +17,8 @@ namespace RouteDistance.UI
         private const string Prefix = "Distance to destination: ";
         private const float VerticalSpacing = 2f;
         private const float InfoPanelBottomPadding = 8f;
+        private const float FeetPerMeter = 3.28084f;
+        private const float FeetPerMile = 5280f;
 
         private UILabel label;
         private UIPanel row;
@@ -197,6 +199,16 @@ namespace RouteDistance.UI
                 return null;
             }
 
+            return ModSettings.UseImperial
+                ? FormatImperialDistance(meters)
+                : FormatMetricDistance(meters);
+        }
+
+        /// <summary>
+        /// Formats a valid distance using metres below one kilometre and kilometres above it.
+        /// </summary>
+        private static string FormatMetricDistance(float meters)
+        {
             if (meters < 1000f)
             {
                 int increment = meters > 100f ? 100 : meters > 50f ? 50 : 10;
@@ -211,6 +223,30 @@ namespace RouteDistance.UI
             }
 
             return (meters / 1000f).ToString("0.0", CultureInfo.InvariantCulture) + " km";
+        }
+
+        /// <summary>
+        /// Formats a valid distance using feet below one mile and miles above it.
+        /// </summary>
+        private static string FormatImperialDistance(float meters)
+        {
+            float feet = meters * FeetPerMeter;
+            if (feet < FeetPerMile)
+            {
+                int increment = feet > 100f ? 100 : feet > 50f ? 50 : 10;
+                int roundedFeet = Mathf.CeilToInt(feet / increment) * increment;
+
+                if (roundedFeet >= FeetPerMile)
+                {
+                    return (roundedFeet / FeetPerMile).ToString(
+                               "0.0",
+                               CultureInfo.InvariantCulture) + " mi";
+                }
+
+                return roundedFeet.ToString(CultureInfo.InvariantCulture) + " ft";
+            }
+
+            return (feet / FeetPerMile).ToString("0.0", CultureInfo.InvariantCulture) + " mi";
         }
     }
 }

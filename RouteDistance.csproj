@@ -69,6 +69,7 @@
 
   <ItemGroup>
     <Compile Include="Mod.cs" />
+    <Compile Include="ModSettings.cs" />
     <Compile Include="LoadingExtension.cs" />
     <Compile Include="Patcher.cs" />
     <Compile Include="Patches/VehicleInfoPanelPatch.cs" />

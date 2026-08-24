@@ -20,6 +20,16 @@ The v1 implementation covers the complete plan through Phase 23:
 
 Select a spawned road vehicle or moving pedestrian to see its remaining route distance. Citizens entering or riding a vehicle intentionally show `—`; v1 does not reconstruct multimodal journeys.
 
+## In-game settings
+
+Open **Options > Mods Settings > Route Distance v1.1.0** to configure the display. The visibility checkboxes are independent and enabled by default:
+
+- **Service vehicles** controls vanilla city-service vehicle panels.
+- **All other vehicles** controls private, cargo, public-transport, and other road-vehicle panels.
+- **Pedestrians** controls moving citizen panels.
+
+The **Distance units** dropdown selects **Metric (m, km)** or **Imperial (ft, mi)**. Metric is the default. Changes are persisted by Cities: Skylines and apply on the next normal panel refresh.
+
 The implementation targets and compiles against the installed Cities: Skylines version **1.21.1-f9**. See [docs/Investigation.md](docs/Investigation.md) for the exact findings and distance model.
 
 ## Requirements
