@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using ColossalFramework;
+using UnityEngine;
 
 namespace RouteDistance.Distance
 {
@@ -112,6 +113,101 @@ namespace RouteDistance.Distance
             return false;
         }
 
+        internal static bool TryCalculateRemainingDistance(
+            IList<PathUnit.Position> positions,
+            byte encodedPositionIndex,
+            Vector3 currentWorldPosition,
+            out float meters)
+        {
+            meters = 0f;
+
+            try
+            {
+                if (positions == null || positions.Count == 0 ||
+                    !IsFinite(currentWorldPosition) || !Singleton<NetManager>.exists)
+                {
+                    return false;
+                }
+
+                NetManager netManager = Singleton<NetManager>.instance;
+                if (!HasNetworkBuffers(netManager))
+                {
+                    return false;
+                }
+
+                float total = 0f;
+                bool isTransitionPhase = encodedPositionIndex != byte.MaxValue &&
+                                         (encodedPositionIndex & 1) != 0;
+
+                if (isTransitionPhase)
+                {
+                    // The even phase has reached the current PathUnit position. During
+                    // the odd phase vanilla moves toward the next lane/position.
+                    if (positions.Count > 1)
+                    {
+                        float transitionDistance;
+                        if (!TryGetCurrentTransitionDistance(
+                                currentWorldPosition,
+                                positions[0],
+                                positions[1],
+                                netManager,
+                                out transitionDistance) ||
+                            !TryAddDistance(ref total, transitionDistance))
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    uint currentLaneId;
+                    NetLane currentLane;
+                    if (!TryGetLane(positions[0], netManager, out currentLaneId, out currentLane))
+                    {
+                        return false;
+                    }
+
+                    byte currentOffset;
+                    PathUnit.CalculatePathPositionOffset(
+                        currentLaneId,
+                        currentWorldPosition,
+                        out currentOffset);
+
+                    float currentLaneDistance = GetLanePortionDistance(
+                        currentLane,
+                        currentOffset,
+                        positions[0].m_offset);
+                    if (!TryAddDistance(ref total, currentLaneDistance))
+                    {
+                        return false;
+                    }
+                }
+
+                int firstPair = isTransitionPhase ? 1 : 0;
+                for (int index = firstPair; index + 1 < positions.Count; index++)
+                {
+                    float pairDistance;
+                    if (!TryGetDistanceBetweenPositions(
+                            positions[index],
+                            positions[index + 1],
+                            netManager,
+                            out pairDistance) ||
+                        !TryAddDistance(ref total, pairDistance))
+                    {
+                        return false;
+                    }
+                }
+
+                meters = total;
+                return true;
+            }
+            catch (Exception)
+            {
+                meters = 0f;
+                return false;
+            }
+        }
+
         private static int DecodePositionIndex(byte encodedPositionIndex)
         {
             // Vanilla PathVisualizer uses 0 for the initial 255 sentinel and index >> 1 otherwise.
@@ -148,6 +244,111 @@ namespace RouteDistance.Distance
 
         private static bool IsValidNetworkPosition(PathUnit.Position position, NetManager netManager)
         {
+            uint laneId;
+            NetLane lane;
+            return TryGetLane(position, netManager, out laneId, out lane);
+        }
+
+        private static bool TryGetDistanceBetweenPositions(
+            PathUnit.Position from,
+            PathUnit.Position to,
+            NetManager netManager,
+            out float meters)
+        {
+            meters = 0f;
+
+            uint fromLaneId;
+            NetLane fromLane;
+            uint toLaneId;
+            NetLane toLane;
+            if (!TryGetLane(from, netManager, out fromLaneId, out fromLane) ||
+                !TryGetLane(to, netManager, out toLaneId, out toLane))
+            {
+                return false;
+            }
+
+            if (fromLaneId == toLaneId)
+            {
+                meters = GetLanePortionDistance(fromLane, from.m_offset, to.m_offset);
+                return IsFiniteNonNegative(meters);
+            }
+
+            Vector3 fromWorldPosition = GetLanePosition(fromLane, from.m_offset);
+            byte toLaneEntryOffset;
+            PathUnit.CalculatePathPositionOffset(
+                toLaneId,
+                fromWorldPosition,
+                out toLaneEntryOffset);
+            Vector3 toLaneEntryPosition = GetLanePosition(toLane, toLaneEntryOffset);
+
+            // Vanilla constructs a short transition curve between lanes. Its control
+            // points are mode-specific, so use the endpoint chord exactly once, then
+            // measure only the untraversed portion of the destination lane.
+            float connectorDistance = Vector3.Distance(fromWorldPosition, toLaneEntryPosition);
+            float toLaneDistance = GetLanePortionDistance(
+                toLane,
+                toLaneEntryOffset,
+                to.m_offset);
+            meters = connectorDistance + toLaneDistance;
+            return IsFiniteNonNegative(meters);
+        }
+
+        private static bool TryGetCurrentTransitionDistance(
+            Vector3 currentWorldPosition,
+            PathUnit.Position from,
+            PathUnit.Position to,
+            NetManager netManager,
+            out float meters)
+        {
+            meters = 0f;
+
+            uint fromLaneId;
+            NetLane fromLane;
+            uint toLaneId;
+            NetLane toLane;
+            if (!TryGetLane(from, netManager, out fromLaneId, out fromLane) ||
+                !TryGetLane(to, netManager, out toLaneId, out toLane))
+            {
+                return false;
+            }
+
+            if (fromLaneId == toLaneId)
+            {
+                byte currentOffset;
+                PathUnit.CalculatePathPositionOffset(
+                    toLaneId,
+                    currentWorldPosition,
+                    out currentOffset);
+                meters = GetLanePortionDistance(toLane, currentOffset, to.m_offset);
+                return IsFiniteNonNegative(meters);
+            }
+
+            Vector3 fromWorldPosition = GetLanePosition(fromLane, from.m_offset);
+            byte toLaneEntryOffset;
+            PathUnit.CalculatePathPositionOffset(
+                toLaneId,
+                fromWorldPosition,
+                out toLaneEntryOffset);
+            Vector3 toLaneEntryPosition = GetLanePosition(toLane, toLaneEntryOffset);
+
+            meters = Vector3.Distance(currentWorldPosition, toLaneEntryPosition) +
+                     GetLanePortionDistance(toLane, toLaneEntryOffset, to.m_offset);
+            return IsFiniteNonNegative(meters);
+        }
+
+        private static bool TryGetLane(
+            PathUnit.Position position,
+            NetManager netManager,
+            out uint laneId,
+            out NetLane lane)
+        {
+            laneId = 0;
+            lane = default(NetLane);
+            if (!HasNetworkBuffers(netManager))
+            {
+                return false;
+            }
+
             NetSegment[] segmentBuffer = netManager.m_segments.m_buffer;
             if (position.m_segment == 0 || position.m_segment >= segmentBuffer.Length)
             {
@@ -167,14 +368,58 @@ namespace RouteDistance.Distance
                 return false;
             }
 
-            uint laneId = PathManager.GetLaneID(position);
+            laneId = PathManager.GetLaneID(position);
             NetLane[] laneBuffer = netManager.m_lanes.m_buffer;
             if (laneId == 0 || laneId >= (uint)laneBuffer.Length)
             {
                 return false;
             }
 
-            return laneBuffer[(int)laneId].m_segment == position.m_segment;
+            lane = laneBuffer[(int)laneId];
+            return lane.m_segment == position.m_segment && IsFiniteNonNegative(lane.m_length);
+        }
+
+        private static bool HasNetworkBuffers(NetManager netManager)
+        {
+            return netManager != null && netManager.m_segments != null &&
+                   netManager.m_segments.m_buffer != null && netManager.m_lanes != null &&
+                   netManager.m_lanes.m_buffer != null;
+        }
+
+        private static Vector3 GetLanePosition(NetLane lane, byte offset)
+        {
+            return lane.CalculatePosition(offset * (1f / 255f));
+        }
+
+        private static float GetLanePortionDistance(NetLane lane, byte fromOffset, byte toOffset)
+        {
+            return lane.m_length * Math.Abs((int)toOffset - fromOffset) / 255f;
+        }
+
+        private static bool TryAddDistance(ref float total, float distance)
+        {
+            if (!IsFiniteNonNegative(distance))
+            {
+                return false;
+            }
+
+            total += distance;
+            return IsFiniteNonNegative(total);
+        }
+
+        private static bool IsFinite(Vector3 value)
+        {
+            return IsFinite(value.x) && IsFinite(value.y) && IsFinite(value.z);
+        }
+
+        private static bool IsFiniteNonNegative(float value)
+        {
+            return value >= 0f && IsFinite(value);
+        }
+
+        private static bool IsFinite(float value)
+        {
+            return !float.IsNaN(value) && !float.IsInfinity(value);
         }
     }
 }

@@ -4,22 +4,25 @@ Route Distance is a read-only Cities: Skylines 1 mod intended to show the remain
 
 ## Current implementation boundary
 
-This repository currently implements the requested plan through **Phase 4**:
+This repository currently implements the requested plan through **Phase 7**:
 
 - buildable ICities project bootstrap
 - inspection of the installed game assemblies
 - defensive selected-entity and existing-path validation
 - bounded, cycle-safe traversal of remaining `PathUnit` positions
+- physical distance over each remaining lane portion
+- lane-transition distance without double-counting either lane
+- current vehicle/citizen progress projected onto the active lane or transition
 
-Physical lane-distance accumulation starts in Phase 5, and the vanilla label/Harmony lifecycle starts in Phases 10-15. Consequently this checkpoint does **not** yet display a distance in game, and the public `TryGet...RemainingDistance` methods correctly return `false` rather than fabricate a value.
+The public `TryGet...RemainingDistance` methods now return a physical distance when a stable, valid path snapshot is available. The vanilla label and Harmony lifecycle begin in Phases 10-15, so this checkpoint does **not** display that value in game yet.
 
-The local game installation inspected during development is **1.21.1-f9**, while the design target is 1.17.x. See [docs/Investigation.md](docs/Investigation.md) for the exact findings and compatibility warning.
+The implementation targets and compiles against the installed Cities: Skylines version **1.21.1-f9**. See [docs/Investigation.md](docs/Investigation.md) for the exact findings and distance model.
 
 ## Requirements
 
 - Cities: Skylines 1 game assemblies from a local installation
 - a .NET Framework/Mono C# build toolchain compatible with .NET 3.5
-- CitiesHarmony for the later runtime integration phase
+- CitiesHarmony/Harmony v2 for the later runtime integration phase
 
 Game and CitiesHarmony DLLs are referenced with `Private=False`; they are never copied into the mod output.
 
@@ -50,6 +53,8 @@ The build fails early with a specific message when a required installed game ass
 ## Safety boundary
 
 The current source only reads the selected entity's existing `m_path`. It does not call `CreatePath`, start pathfinding, alter path units, add path references, scan the city, or write to simulation-owned vehicle, citizen, path, segment, or lane state.
+
+Different-lane transitions use the straight-line distance between vanilla-derived lane endpoints because the exact connector curve is constructed differently for each AI. Lane portions use vanilla's cached physical `NetLane.m_length`; no fixed distance per path position is assumed.
 
 ## License
 

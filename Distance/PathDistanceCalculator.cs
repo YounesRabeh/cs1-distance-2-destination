@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using ColossalFramework;
+using UnityEngine;
 
 namespace RouteDistance.Distance
 {
@@ -11,14 +12,22 @@ namespace RouteDistance.Distance
             meters = 0f;
 
             List<PathUnit.Position> positions;
-            if (!TryGetVehicleRemainingPath(vehicleId, out positions))
+            byte pathPositionIndex;
+            Vector3 worldPosition;
+            if (!TryGetVehicleRemainingPath(
+                    vehicleId,
+                    out positions,
+                    out pathPositionIndex,
+                    out worldPosition))
             {
                 return false;
             }
 
-            // Phase 4 ends with a validated remaining-position snapshot. Physical lane
-            // distance begins in Phase 5, so this API must not claim a fabricated value.
-            return false;
+            return PathHelpers.TryCalculateRemainingDistance(
+                positions,
+                pathPositionIndex,
+                worldPosition,
+                out meters);
         }
 
         public static bool TryGetCitizenRemainingDistance(ushort citizenInstanceId, out float meters)
@@ -26,21 +35,33 @@ namespace RouteDistance.Distance
             meters = 0f;
 
             List<PathUnit.Position> positions;
-            if (!TryGetCitizenRemainingPath(citizenInstanceId, out positions))
+            byte pathPositionIndex;
+            Vector3 worldPosition;
+            if (!TryGetCitizenRemainingPath(
+                    citizenInstanceId,
+                    out positions,
+                    out pathPositionIndex,
+                    out worldPosition))
             {
                 return false;
             }
 
-            // See TryGetVehicleRemainingDistance: distance accumulation is out of the
-            // requested Phase 0-4 scope.
-            return false;
+            return PathHelpers.TryCalculateRemainingDistance(
+                positions,
+                pathPositionIndex,
+                worldPosition,
+                out meters);
         }
 
         internal static bool TryGetVehicleRemainingPath(
             ushort vehicleId,
-            out List<PathUnit.Position> positions)
+            out List<PathUnit.Position> positions,
+            out byte pathPositionIndex,
+            out Vector3 worldPosition)
         {
             positions = null;
+            pathPositionIndex = 0;
+            worldPosition = Vector3.zero;
 
             try
             {
@@ -63,7 +84,7 @@ namespace RouteDistance.Distance
                 }
 
                 uint pathId = vehicle.m_path;
-                byte pathPositionIndex = vehicle.m_pathPositionIndex;
+                pathPositionIndex = vehicle.m_pathPositionIndex;
                 if (pathId == 0 ||
                     !PathHelpers.TryGetRemainingPositions(pathId, pathPositionIndex, out positions))
                 {
@@ -78,20 +99,27 @@ namespace RouteDistance.Distance
                     return false;
                 }
 
+                worldPosition = current.GetLastFramePosition();
                 return true;
             }
             catch (Exception)
             {
                 positions = null;
+                pathPositionIndex = 0;
+                worldPosition = Vector3.zero;
                 return false;
             }
         }
 
         internal static bool TryGetCitizenRemainingPath(
             ushort citizenInstanceId,
-            out List<PathUnit.Position> positions)
+            out List<PathUnit.Position> positions,
+            out byte pathPositionIndex,
+            out Vector3 worldPosition)
         {
             positions = null;
+            pathPositionIndex = 0;
+            worldPosition = Vector3.zero;
 
             try
             {
@@ -114,7 +142,7 @@ namespace RouteDistance.Distance
                 }
 
                 uint pathId = instance.m_path;
-                byte pathPositionIndex = instance.m_pathPositionIndex;
+                pathPositionIndex = instance.m_pathPositionIndex;
                 if (pathId == 0 ||
                     !PathHelpers.TryGetRemainingPositions(pathId, pathPositionIndex, out positions))
                 {
@@ -129,11 +157,14 @@ namespace RouteDistance.Distance
                     return false;
                 }
 
+                worldPosition = current.GetLastFramePosition();
                 return true;
             }
             catch (Exception)
             {
                 positions = null;
+                pathPositionIndex = 0;
+                worldPosition = Vector3.zero;
                 return false;
             }
         }
