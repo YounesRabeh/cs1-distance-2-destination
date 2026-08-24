@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using ColossalFramework;
 using UnityEngine;
 
-namespace RouteDistance.Distance
+namespace DistanceToDestination.Distance
 {
     /// <summary>
     /// Reads existing vehicle and pedestrian paths and calculates their remaining length.
@@ -208,7 +208,7 @@ namespace RouteDistance.Distance
             }
 
             nextUnexpectedLogTime = now + UnexpectedLogInterval;
-            Debug.LogError("[Route Distance] Unexpected calculator/UI exception (rate limited)");
+            Debug.LogError("[Distance 2 Destination] Unexpected calculator/UI exception (rate limited)");
             Debug.LogException(exception);
         }
 

@@ -1,19 +1,19 @@
-// Creates, updates, and removes the Route Distance row in vanilla information panels.
+// Creates, updates, and removes the Distance 2 Destination row in vanilla information panels.
 // Preserves panel layout by restoring every size changed when the row is removed.
 using System;
 using System.Globalization;
 using ColossalFramework.UI;
 using UnityEngine;
 
-namespace RouteDistance.UI
+namespace DistanceToDestination.UI
 {
     /// <summary>
     /// Owns a vanilla-styled distance row and the panel sizing required to display it.
     /// </summary>
     public sealed class DistanceLabel
     {
-        private const string RowName = "RouteDistanceRow";
-        private const string ComponentName = "RouteDistanceLabel";
+        private const string RowName = "DistanceToDestinationRow";
+        private const string ComponentName = "DistanceToDestinationLabel";
         private const string Prefix = "Distance to destination: ";
         private const float VerticalSpacing = 2f;
         private const float InfoPanelBottomPadding = 8f;

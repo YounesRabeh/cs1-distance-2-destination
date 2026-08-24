@@ -1,15 +1,15 @@
-// Stores Route Distance's persistent visibility and unit preferences.
+// Stores Distance 2 Destination's persistent visibility and unit preferences.
 // Exposes a small typed API shared by the settings menu and panel patches.
 using ColossalFramework;
 
-namespace RouteDistance
+namespace DistanceToDestination
 {
     /// <summary>
     /// Provides persistent user preferences backed by the game's settings system.
     /// </summary>
     internal static class ModSettings
     {
-        internal const string SettingsFileName = "RouteDistance";
+        internal const string SettingsFileName = "DistanceToDestination";
 
         private static readonly SavedBool ServiceVehiclesSetting =
             new SavedBool("ShowServiceVehicles", SettingsFileName, true, true);

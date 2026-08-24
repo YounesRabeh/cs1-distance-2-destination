@@ -1,6 +1,6 @@
-# Route Distance
+# Distance 2 Destination
 
-Route Distance is a Cities: Skylines 1 mod that shows how far a selected vehicle or walking citizen has left to travel.
+Distance 2 Destination is a Cities: Skylines 1 mod that shows how far a selected vehicle or walking citizen has left to travel.
 
 ## Features
 
@@ -15,13 +15,13 @@ Route Distance is a Cities: Skylines 1 mod that shows how far a selected vehicle
 - Cities: Skylines 1 version 1.21.1-f9 or later
 - [Harmony 2.2.2-0 (Mod Dependency)](https://steamcommunity.com/sharedfiles/filedetails/?id=2040656402)
 
-Route Distance does not include Harmony itself. Subscribe to the Harmony dependency before using the mod.
+Distance 2 Destination does not include Harmony itself. Subscribe to the Harmony dependency before using the mod.
 
 ## Using the mod
 
-Enable **Route Distance vx.x.x** in Content Manager, load a city, and select a moving road vehicle or pedestrian. The remaining distance appears below the normal activity line.
+Enable **Distance 2 Destination vx.x.x** in Content Manager, load a city, and select a moving road vehicle or pedestrian. The remaining distance appears below the normal activity line.
 
-Open **Options > Mods Settings > Route Distance vx.x.x** to choose what the mod displays and whether it uses metric or imperial units.
+Open **Options > Mods Settings > Distance 2 Destination vx.x.x** to choose what the mod displays and whether it uses metric or imperial units.
 
 ## Documentation
 
@@ -32,4 +32,4 @@ Open **Options > Mods Settings > Route Distance vx.x.x** to choose what the mod 
 
 ## License
 
-Route Distance is licensed under the MIT License.
+Distance 2 Destination is licensed under the MIT License.

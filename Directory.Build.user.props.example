@@ -11,7 +11,7 @@
     <CitiesHarmonyApiDllPath>/path/to/CitiesHarmony.API.dll</CitiesHarmonyApiDllPath>
 
     <!-- Optional build/deployment overrides. -->
-    <BuildOutputRoot>/path/to/temporary/RouteDistance-build</BuildOutputRoot>
-    <ModOutputDir>/path/to/Cities_Skylines/Addons/Mods/RouteDistance</ModOutputDir>
+    <BuildOutputRoot>/path/to/temporary/DistanceToDestination-build</BuildOutputRoot>
+    <ModOutputDir>/path/to/Cities_Skylines/Addons/Mods/DistanceToDestination</ModOutputDir>
   </PropertyGroup>
 </Project>

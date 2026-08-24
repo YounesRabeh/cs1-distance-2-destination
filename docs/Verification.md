@@ -12,7 +12,7 @@ The current Release build has been checked for:
 - No calls that create paths or start pathfinding
 - No writes to vehicle, citizen, path, segment, or lane simulation fields
 - Packaging without game assemblies or the Harmony implementation
-- Matching built and locally installed `RouteDistance.dll` artifacts
+- Matching built and locally installed `DistanceToDestination.dll` artifacts
 
 The official API produces one expected ICities 1.16/1.17 unification warning; the build resolves it to the installed ICities 1.17 assembly.
 

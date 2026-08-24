@@ -5,11 +5,11 @@ using System.Reflection;
 using ColossalFramework;
 using ColossalFramework.UI;
 using HarmonyLib;
-using RouteDistance.Distance;
-using RouteDistance.UI;
+using DistanceToDestination.Distance;
+using DistanceToDestination.UI;
 using UnityEngine;
 
-namespace RouteDistance.Patches
+namespace DistanceToDestination.Patches
 {
     /// <summary>
     /// Refreshes the citizen distance row after vanilla binds its information panel.

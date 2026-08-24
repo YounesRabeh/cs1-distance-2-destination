@@ -5,8 +5,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{4C4F4C3D-6CC2-4975-A1AD-A3557E8D5794}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>RouteDistance</RootNamespace>
-    <AssemblyName>RouteDistance</AssemblyName>
+    <RootNamespace>DistanceToDestination</RootNamespace>
+    <AssemblyName>DistanceToDestination</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <FileAlignment>512</FileAlignment>

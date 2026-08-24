@@ -4,11 +4,11 @@
 
 1. Install Cities: Skylines 1.
 2. Subscribe to **Harmony 2.2.2-0 (Mod Dependency)** on Steam Workshop.
-3. Install Route Distance.
-4. Open **Content Manager > Mods** and enable **Route Distance v1.1.0**.
+3. Install Distance 2 Destination.
+4. Open **Content Manager > Mods** and enable **Distance 2 Destination v1.1.0**.
 5. Restart the game after replacing a local build of the mod.
 
-Route Distance includes the small CitiesHarmony API helper, but it does not include the Harmony implementation. Harmony must be installed separately through its Workshop item.
+Distance 2 Destination includes the small CitiesHarmony API helper, but it does not include the Harmony implementation. Harmony must be installed separately through its Workshop item.
 
 ## Showing a distance
 
@@ -24,7 +24,7 @@ The field is hidden for idle citizens without a **Going...** activity and for st
 
 ## Settings
 
-Open **Options > Mods Settings > Route Distance v1.1.0**.
+Open **Options > Mods Settings > Distance 2 Destination v1.1.0**.
 
 The **Show distance for** section contains three independent options, all enabled by default:
 
@@ -43,11 +43,11 @@ Changes are saved by the game and apply on the next information-panel refresh.
 
 ### The mod does not appear
 
-Confirm that `RouteDistance.dll` is inside a Route Distance folder under the game's local `Addons/Mods` directory. Restart the game after installing or replacing the file.
+Confirm that `DistanceToDestination.dll` is inside a DistanceToDestination folder under the game's local `Addons/Mods` directory. Restart the game after installing or replacing the file.
 
 ### The mod appears but no distance is shown
 
-Check that Route Distance and Harmony are enabled in Content Manager. Also check the Route Distance visibility settings for the selected entity type.
+Check that Distance 2 Destination and Harmony are enabled in Content Manager. Also check the Distance 2 Destination visibility settings for the selected entity type.
 
 The field is intentionally absent when the selected entity has no supported active trip. Near arrival, a temporary dash can appear while the game releases or replaces the route.
 

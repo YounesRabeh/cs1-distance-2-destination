@@ -31,7 +31,7 @@ For a nonstandard game installation, copy `Directory.Build.user.props.example` t
 ## Build
 
 ```text
-msbuild RouteDistance.csproj /p:Configuration=Release
+msbuild DistanceToDestination.csproj /p:Configuration=Release
 ```
 
 The default output is:
@@ -40,7 +40,7 @@ The default output is:
 artifacts/bin/Release
 ```
 
-The output contains `RouteDistance.dll`, symbols when available, and `CitiesHarmony.API.dll`. It must not contain game assemblies or `CitiesHarmony.Harmony.dll`.
+The output contains `DistanceToDestination.dll`, symbols when available, and `CitiesHarmony.API.dll`. It must not contain game assemblies or `CitiesHarmony.Harmony.dll`.
 
 ## Local build and installation
 
@@ -50,7 +50,7 @@ This workspace includes the ignored helper script:
 ./build-and-install-local.sh
 ```
 
-It builds with the game's bundled Mono and updates the local Route Distance mod folder. Its paths are specific to the local development machine and should be adjusted for another installation.
+It builds with the game's bundled Mono and updates the local DistanceToDestination mod folder. Its paths are specific to the local development machine and should be adjusted for another installation.
 
 Restart Cities: Skylines after updating the installed DLL because an already running game keeps the previous assembly loaded.
 

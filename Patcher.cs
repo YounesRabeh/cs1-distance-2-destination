@@ -1,18 +1,18 @@
-// Applies and removes Route Distance's owner-scoped Harmony patches.
+// Applies and removes Distance 2 Destination's owner-scoped Harmony patches.
 // Centralizes UI cleanup so disabling the mod restores vanilla panels.
 using System;
 using HarmonyLib;
-using RouteDistance.Patches;
+using DistanceToDestination.Patches;
 using UnityEngine;
 
-namespace RouteDistance
+namespace DistanceToDestination
 {
     /// <summary>
     /// Manages idempotent Harmony patching and cleanup for the mod lifetime.
     /// </summary>
     internal static class Patcher
     {
-        internal const string HarmonyId = "com.routedistance.cs1";
+        internal const string HarmonyId = "com.distancetodestination.cs1";
 
         private static bool patched;
 
@@ -31,7 +31,7 @@ namespace RouteDistance
             {
                 harmony.PatchAll(typeof(Patcher).Assembly);
                 patched = true;
-                Debug.Log("[Route Distance] Harmony patches applied");
+                Debug.Log("[Distance 2 Destination] Harmony patches applied");
             }
             catch (Exception exception)
             {
@@ -48,7 +48,7 @@ namespace RouteDistance
 
                 patched = !cleanupSucceeded;
                 CleanupLabels();
-                Debug.LogError("[Route Distance] Failed to apply Harmony patches");
+                Debug.LogError("[Distance 2 Destination] Failed to apply Harmony patches");
                 Debug.LogException(exception);
             }
         }
@@ -68,11 +68,11 @@ namespace RouteDistance
             {
                 new Harmony(HarmonyId).UnpatchAll(HarmonyId);
                 patched = false;
-                Debug.Log("[Route Distance] Harmony patches removed");
+                Debug.Log("[Distance 2 Destination] Harmony patches removed");
             }
             catch (Exception exception)
             {
-                Debug.LogError("[Route Distance] Failed to remove Harmony patches");
+                Debug.LogError("[Distance 2 Destination] Failed to remove Harmony patches");
                 Debug.LogException(exception);
             }
             CleanupLabels();

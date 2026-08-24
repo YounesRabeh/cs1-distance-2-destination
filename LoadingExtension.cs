@@ -1,13 +1,13 @@
-// Owns the game-loading lifecycle for Route Distance.
+// Owns the game-loading lifecycle for Distance 2 Destination.
 // Applies patches after Harmony is available and removes them when the level is released.
 using CitiesHarmony.API;
 using ICities;
 using UnityEngine;
 
-namespace RouteDistance
+namespace DistanceToDestination
 {
     /// <summary>
-    /// Connects Route Distance's Harmony lifecycle to Cities: Skylines level loading.
+    /// Connects Distance 2 Destination's Harmony lifecycle to Cities: Skylines level loading.
     /// </summary>
     public sealed class LoadingExtension : LoadingExtensionBase
     {
@@ -16,14 +16,14 @@ namespace RouteDistance
         /// </summary>
         public override void OnCreated(ILoading loading)
         {
-            Debug.Log("[Route Distance] Loaded");
+            Debug.Log("[Distance 2 Destination] Loaded");
             if (HarmonyHelper.IsHarmonyInstalled)
             {
                 Patcher.PatchAll();
             }
             else
             {
-                Debug.LogWarning("[Route Distance] Harmony 2.2.2 is unavailable; UI patches were not applied");
+                Debug.LogWarning("[Distance 2 Destination] Harmony 2.2.2 is unavailable; UI patches were not applied");
             }
         }
 

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using ColossalFramework;
 using UnityEngine;
 
-namespace RouteDistance.Distance
+namespace DistanceToDestination.Distance
 {
     /// <summary>
     /// Contains bounded, defensive path traversal and lane-distance calculations.

@@ -3,10 +3,10 @@
 using CitiesHarmony.API;
 using ICities;
 
-namespace RouteDistance
+namespace DistanceToDestination
 {
     /// <summary>
-    /// Supplies Route Distance metadata and dependency lifecycle hooks to the game.
+    /// Supplies Distance 2 Destination metadata and dependency lifecycle hooks to the game.
     /// </summary>
     public sealed class Mod : IUserMod
     {
@@ -17,7 +17,7 @@ namespace RouteDistance
         /// </summary>
         public string Name
         {
-            get { return "Route Distance v" + Version; }
+            get { return "Distance 2 Destination v" + Version; }
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace RouteDistance
         }
 
         /// <summary>
-        /// Removes Route Distance patches when the mod is disabled.
+        /// Removes Distance 2 Destination patches when the mod is disabled.
         /// </summary>
         public void OnDisabled()
         {
@@ -49,7 +49,7 @@ namespace RouteDistance
         }
 
         /// <summary>
-        /// Builds the Route Distance options shown in the game's Mods Settings menu.
+        /// Builds the Distance 2 Destination options shown in the game's Mods Settings menu.
         /// </summary>
         public void OnSettingsUI(UIHelperBase helper)
         {
