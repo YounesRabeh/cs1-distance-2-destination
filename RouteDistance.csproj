@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4C4F4C3D-6CC2-4975-A1AD-A3557E8D5794}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>RouteDistance</RootNamespace>
+    <AssemblyName>RouteDistance</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+    <FileAlignment>512</FileAlignment>
+    <BuildOutputRoot Condition=" '$(BuildOutputRoot)' == '' ">$(MSBuildProjectDirectory)/artifacts</BuildOutputRoot>
+    <BaseIntermediateOutputPath>$(BuildOutputRoot)/obj/</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)/</IntermediateOutputPath>
+    <OutputPath>$(BuildOutputRoot)/bin/$(Configuration)/</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildProjectDirectory)/Directory.Build.user.props"
+          Condition="Exists('$(MSBuildProjectDirectory)/Directory.Build.user.props')" />
+
+  <PropertyGroup>
+    <CitiesSkylinesManagedDir Condition=" '$(CitiesSkylinesManagedDir)' == '' and Exists('$(HOME)/.local/share/Steam/steamapps/common/Cities_Skylines/Cities_Data/Managed/Assembly-CSharp.dll') ">$(HOME)/.local/share/Steam/steamapps/common/Cities_Skylines/Cities_Data/Managed</CitiesSkylinesManagedDir>
+    <CitiesSkylinesManagedDir Condition=" '$(CitiesSkylinesManagedDir)' == '' and Exists('$(HOME)/Library/Application Support/Steam/steamapps/common/Cities_Skylines/Cities.app/Contents/Resources/Cities_Data/Managed/Assembly-CSharp.dll') ">$(HOME)/Library/Application Support/Steam/steamapps/common/Cities_Skylines/Cities.app/Contents/Resources/Cities_Data/Managed</CitiesSkylinesManagedDir>
+    <CitiesSkylinesManagedDir Condition=" '$(CitiesSkylinesManagedDir)' == '' and Exists('$(ProgramFiles(x86))/Steam/steamapps/common/Cities_Skylines/Cities_Data/Managed/Assembly-CSharp.dll') ">$(ProgramFiles(x86))/Steam/steamapps/common/Cities_Skylines/Cities_Data/Managed</CitiesSkylinesManagedDir>
+    <HarmonyDllPath Condition=" '$(HarmonyDllPath)' == '' and Exists('$(HOME)/.local/share/Steam/steamapps/workshop/content/255710/2040656402/CitiesHarmony.Harmony.dll') ">$(HOME)/.local/share/Steam/steamapps/workshop/content/255710/2040656402/CitiesHarmony.Harmony.dll</HarmonyDllPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(CitiesSkylinesManagedDir)/Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ColossalManaged">
+      <HintPath>$(CitiesSkylinesManagedDir)/ColossalManaged.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ICities">
+      <HintPath>$(CitiesSkylinesManagedDir)/ICities.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(CitiesSkylinesManagedDir)/UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <!-- Reserved for the Phase 15 integration. Never copied into the mod output. -->
+    <Reference Include="CitiesHarmony.Harmony" Condition="Exists('$(HarmonyDllPath)')">
+      <HintPath>$(HarmonyDllPath)</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Mod.cs" />
+    <Compile Include="LoadingExtension.cs" />
+    <Compile Include="Patcher.cs" />
+    <Compile Include="Patches/VehicleInfoPanelPatch.cs" />
+    <Compile Include="Patches/CitizenInfoPanelPatch.cs" />
+    <Compile Include="Distance/PathDistanceCalculator.cs" />
+    <Compile Include="Distance/PathHelpers.cs" />
+    <Compile Include="UI/DistanceLabel.cs" />
+  </ItemGroup>
+
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+  <Target Name="ValidateGameReferences" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition=" '$(CitiesSkylinesManagedDir)' == '' "
+           Text="CitiesSkylinesManagedDir was not detected. Copy Directory.Build.user.props.example to Directory.Build.user.props and configure the installed game's Managed directory." />
+    <Error Condition="!Exists('$(CitiesSkylinesManagedDir)/Assembly-CSharp.dll')"
+           Text="Missing Assembly-CSharp.dll under CitiesSkylinesManagedDir=$(CitiesSkylinesManagedDir)" />
+    <Error Condition="!Exists('$(CitiesSkylinesManagedDir)/ColossalManaged.dll')"
+           Text="Missing ColossalManaged.dll under CitiesSkylinesManagedDir=$(CitiesSkylinesManagedDir)" />
+    <Error Condition="!Exists('$(CitiesSkylinesManagedDir)/ICities.dll')"
+           Text="Missing ICities.dll under CitiesSkylinesManagedDir=$(CitiesSkylinesManagedDir)" />
+    <Error Condition="!Exists('$(CitiesSkylinesManagedDir)/UnityEngine.dll')"
+           Text="Missing UnityEngine.dll under CitiesSkylinesManagedDir=$(CitiesSkylinesManagedDir)" />
+  </Target>
+
+  <!-- Classic xbuild invokes this conventional hook; modern MSBuild uses BeforeTargets above. -->
+  <Target Name="BeforeBuild" DependsOnTargets="ValidateGameReferences" />
+
+  <Target Name="DeployMod" AfterTargets="Build" Condition=" '$(ModOutputDir)' != '' ">
+    <MakeDir Directories="$(ModOutputDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModOutputDir)" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb"
+          DestinationFolder="$(ModOutputDir)"
+          Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
+    <Copy SourceFiles="$(TargetPath).mdb"
+          DestinationFolder="$(ModOutputDir)"
+          Condition="Exists('$(TargetPath).mdb')" />
+  </Target>
+
+  <!-- Conventional hooks keep the project functional on CS1's older bundled xbuild. -->
+  <Target Name="AfterBuild" DependsOnTargets="DeployMod" />
+</Project>

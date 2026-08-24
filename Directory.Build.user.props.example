@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <!-- The directory containing Assembly-CSharp.dll, ICities.dll, and the other game assemblies. -->
+    <CitiesSkylinesManagedDir>/path/to/Cities_Skylines/Cities_Data/Managed</CitiesSkylinesManagedDir>
+
+    <!-- CitiesHarmony's Harmony 2 implementation; it is referenced with Private=False. -->
+    <HarmonyDllPath>/path/to/CitiesHarmony.Harmony.dll</HarmonyDllPath>
+
+    <!-- Optional build/deployment overrides. -->
+    <BuildOutputRoot>/path/to/temporary/RouteDistance-build</BuildOutputRoot>
+    <ModOutputDir>/path/to/Cities_Skylines/Addons/Mods/RouteDistance</ModOutputDir>
+  </PropertyGroup>
+</Project>

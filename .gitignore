@@ -38,6 +38,8 @@ ScaffoldingReadMe.txt
 
 # dotenv environment variables file
 .env
+.dev-env/
+Directory.Build.user.props
 
 # Others
 ~$*
