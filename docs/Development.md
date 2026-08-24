@@ -15,6 +15,7 @@ The project references assemblies from an installed copy of Cities: Skylines. It
 Distance/       Existing-path traversal and geometry
 Patches/        Vehicle and citizen information-panel patches
 UI/             Distance row and panel layout
+assets/         Full-size artwork and optimized Workshop preview
 Mod.cs          Mod metadata and settings UI
 ModSettings.cs  Persistent preferences
 Patcher.cs      Harmony lifecycle
