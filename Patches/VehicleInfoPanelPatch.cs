@@ -27,19 +27,29 @@ namespace RouteDistance.Patches
                     return;
                 }
 
-                UILabel status = __instance.Find<UILabel>("Status");
-                if (!Label.Attach(status))
+                InstanceID selected = WorldInfoPanel.GetCurrentInstanceID();
+                ushort vehicleId = selected.Type == InstanceType.Vehicle ? selected.Vehicle : (ushort)0;
+                vehicleId = GetFirstVehicle(vehicleId);
+
+                if (vehicleId == 0 || IsParkedVehicle(vehicleId))
                 {
+                    Label.Remove();
+                    lastVehicleId = vehicleId;
+                    nextRefreshTime = 0f;
                     return;
                 }
 
-                InstanceID selected = WorldInfoPanel.GetCurrentInstanceID();
-                ushort vehicleId = selected.Type == InstanceType.Vehicle ? selected.Vehicle : (ushort)0;
                 if (vehicleId != lastVehicleId)
                 {
                     lastVehicleId = vehicleId;
                     nextRefreshTime = 0f;
                     Label.SetUnavailable();
+                }
+
+                UILabel status = __instance.Find<UILabel>("Status");
+                if (!Label.Attach(status))
+                {
+                    return;
                 }
 
                 float now = Time.realtimeSinceStartup;
@@ -49,7 +59,6 @@ namespace RouteDistance.Patches
                 }
 
                 nextRefreshTime = now + RefreshInterval;
-                vehicleId = GetFirstVehicle(vehicleId);
 
                 float meters;
                 if (vehicleId != 0 &&
@@ -92,6 +101,24 @@ namespace RouteDistance.Patches
             }
 
             return manager.m_vehicles.m_buffer[vehicleId].GetFirstVehicle(vehicleId);
+        }
+
+        private static bool IsParkedVehicle(ushort vehicleId)
+        {
+            if (vehicleId == 0 || !ColossalFramework.Singleton<VehicleManager>.exists)
+            {
+                return false;
+            }
+
+            VehicleManager manager = ColossalFramework.Singleton<VehicleManager>.instance;
+            if (manager == null || manager.m_vehicles == null ||
+                manager.m_vehicles.m_buffer == null ||
+                vehicleId >= manager.m_vehicles.m_buffer.Length)
+            {
+                return false;
+            }
+
+            return (manager.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.Parking) != 0;
         }
     }
 }
