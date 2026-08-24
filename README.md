@@ -1,6 +1,9 @@
-# Distance 2 Destination
+![D2D Preview](assets/PreviewImage.png)
 
-Distance 2 Destination is a Cities: Skylines 1 mod that shows how far a selected vehicle or walking citizen has left to travel.
+Distance 2 Destination is a **Cities: Skylines (CS1)** mod that shows how far a selected vehicle or walking citizen has left to travel.
+
+**[Steam Workshop Item](https://steamcommunity.com/sharedfiles/filedetails/?id=3789370121)**
+
 
 ## Features
 
