@@ -88,11 +88,11 @@ It is therefore mode/cost dependent. It must not replace lane traversal for Rout
 
 The calculator never treats positions as equally spaced and never uses `PathUnit.m_length` as meters.
 
-- Two positions on the same lane contribute `lane.m_length * abs(toOffset - fromOffset) / 255`.
-- For a change from lane A to lane B, the calculator resolves A's target world position, uses vanilla `PathUnit.CalculatePathPositionOffset` to find the entry offset on B, adds the endpoint chord between them once, then adds only B's entry-to-target lane portion. This avoids counting all of either lane.
-- The connector is an intentional approximation. Vehicle and citizen AIs build mode-specific Bezier control points at runtime; reconstructing those private curves would duplicate substantial AI logic. The chord preserves the correct endpoints and normally introduces only a small local error.
+- Two positions on the same lane contribute the sampled arc length of `NetLane`'s Bezier between their normalized byte offsets. Samples are spaced no farther than 16 offset units apart.
+- For a change from lane A to lane B, the calculator resolves A's target world position, uses vanilla `PathUnit.CalculatePathPositionOffset` to find the entry offset on B, and builds a tangent-aligned cubic connector between those endpoints. Sixteen chord samples approximate that connector's arc length, followed by only B's entry-to-target lane portion.
+- The connector remains an intentional approximation. Vehicle and citizen AIs build mode-specific Bezier control points at runtime; reconstructing those private curves would duplicate substantial AI logic. Lane-derived endpoint tangents preserve curved turns more closely than a single endpoint chord.
 - During an even lane-travel phase, the entity's last-frame world position is projected onto the current lane with vanilla `CalculatePathPositionOffset`. Only the portion from that projected offset to the current target is counted.
-- During an odd transition phase, the already-completed current-lane portion is omitted. The remaining connector chord starts at the entity's current world position, followed by the untraversed part of the next lane.
+- During an odd transition phase, the already-completed current-lane portion is omitted. The entity's current world position is matched to the nearest connector sample, and only the sampled remainder plus the untraversed part of the next lane is counted.
 - An odd phase with no following position contributes zero: vanilla has reached the terminal target and is about to release or replace the path.
 
 Every lane, segment, offset-derived position, and accumulated float is validated. Invalid, released, changing, cyclic, non-finite, or otherwise inconsistent state returns `false` instead of a partial result.
@@ -125,7 +125,7 @@ Every lane, segment, offset-derived position, and accumulated float is validated
 | Current progress | decoded index plus even lane/odd connector phase; current world position is projected with vanilla helpers |
 | Path layout/access | 12 inline positions, `GetPosition`, chained by `m_nextPathUnit` |
 | Position to lane | `PathManager.GetLaneID(Position)` |
-| Lane length | cached physical `NetLane.m_length`, built from lane Bezier |
+| Lane length | sampled physical `NetLane` Bezier arc between path offsets |
 | `PathUnit.m_length` | search bound, then mode-dependent method distance/duration; not physical route length |
 | Panel integration | root component; status-label parent is confirmed content/style source |
 

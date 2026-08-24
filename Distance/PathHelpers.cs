@@ -13,6 +13,12 @@ namespace RouteDistance.Distance
     internal static class PathHelpers
     {
         internal const int MaxPathUnits = 4096;
+        private const int LaneOffsetStep = 16;
+        private const int ConnectorSamples = 16;
+        private const int TangentOffsetStep = 4;
+        private const float ConnectorHandleScale = 0.5f;
+        private const float MaxConnectorHandleLength = 24f;
+        private const float MinimumDirectionMagnitude = 0.0001f;
 
         /// <summary>
         /// Collects the remaining positions in a ready PathUnit chain without mutating it.
@@ -294,10 +300,16 @@ namespace RouteDistance.Distance
                 out toLaneEntryOffset);
             Vector3 toLaneEntryPosition = GetLanePosition(toLane, toLaneEntryOffset);
 
-            // Vanilla constructs a short transition curve between lanes. Its control
-            // points are mode-specific, so use the endpoint chord exactly once, then
-            // measure only the untraversed portion of the destination lane.
-            float connectorDistance = Vector3.Distance(fromWorldPosition, toLaneEntryPosition);
+            // Path units do not retain the AI-specific connector curve. Approximate
+            // it with a tangent-aligned cubic curve and sample that curve once.
+            float connectorDistance = GetConnectorDistance(
+                fromLane,
+                from.m_offset,
+                fromWorldPosition,
+                toLane,
+                toLaneEntryOffset,
+                to.m_offset,
+                toLaneEntryPosition);
             float toLaneDistance = GetLanePortionDistance(
                 toLane,
                 toLaneEntryOffset,
@@ -344,7 +356,15 @@ namespace RouteDistance.Distance
                 out toLaneEntryOffset);
             Vector3 toLaneEntryPosition = GetLanePosition(toLane, toLaneEntryOffset);
 
-            meters = Vector3.Distance(currentWorldPosition, toLaneEntryPosition) +
+            meters = GetRemainingConnectorDistance(
+                         currentWorldPosition,
+                         fromLane,
+                         from.m_offset,
+                         fromWorldPosition,
+                         toLane,
+                         toLaneEntryOffset,
+                         to.m_offset,
+                         toLaneEntryPosition) +
                      GetLanePortionDistance(toLane, toLaneEntryOffset, to.m_offset);
             return IsFiniteNonNegative(meters);
         }
@@ -406,7 +426,217 @@ namespace RouteDistance.Distance
 
         private static float GetLanePortionDistance(NetLane lane, byte fromOffset, byte toOffset)
         {
-            return lane.m_length * Math.Abs((int)toOffset - fromOffset) / 255f;
+            int offsetDelta = Math.Abs((int)toOffset - fromOffset);
+            if (offsetDelta == 0)
+            {
+                return 0f;
+            }
+
+            int sampleCount = Math.Max(1, (offsetDelta + LaneOffsetStep - 1) / LaneOffsetStep);
+            float from = fromOffset * (1f / 255f);
+            float to = toOffset * (1f / 255f);
+            Vector3 previous = lane.CalculatePosition(from);
+            float distance = 0f;
+
+            for (int sample = 1; sample <= sampleCount; sample++)
+            {
+                float progress = sample / (float)sampleCount;
+                Vector3 current = lane.CalculatePosition(from + ((to - from) * progress));
+                distance += Vector3.Distance(previous, current);
+                previous = current;
+            }
+
+            return distance;
+        }
+
+        private static float GetConnectorDistance(
+            NetLane fromLane,
+            byte fromOffset,
+            Vector3 fromPosition,
+            NetLane toLane,
+            byte toEntryOffset,
+            byte toTargetOffset,
+            Vector3 toPosition)
+        {
+            Vector3 control1;
+            Vector3 control2;
+            GetConnectorControls(
+                fromLane,
+                fromOffset,
+                fromPosition,
+                toLane,
+                toEntryOffset,
+                toTargetOffset,
+                toPosition,
+                out control1,
+                out control2);
+
+            Vector3 previous = fromPosition;
+            float distance = 0f;
+            for (int sample = 1; sample <= ConnectorSamples; sample++)
+            {
+                Vector3 current = GetCubicPosition(
+                    fromPosition,
+                    control1,
+                    control2,
+                    toPosition,
+                    sample / (float)ConnectorSamples);
+                distance += Vector3.Distance(previous, current);
+                previous = current;
+            }
+
+            return distance;
+        }
+
+        private static float GetRemainingConnectorDistance(
+            Vector3 currentWorldPosition,
+            NetLane fromLane,
+            byte fromOffset,
+            Vector3 fromPosition,
+            NetLane toLane,
+            byte toEntryOffset,
+            byte toTargetOffset,
+            Vector3 toPosition)
+        {
+            Vector3 control1;
+            Vector3 control2;
+            GetConnectorControls(
+                fromLane,
+                fromOffset,
+                fromPosition,
+                toLane,
+                toEntryOffset,
+                toTargetOffset,
+                toPosition,
+                out control1,
+                out control2);
+
+            int nearestSample = 0;
+            float nearestDistanceSquared = float.MaxValue;
+            for (int sample = 0; sample <= ConnectorSamples; sample++)
+            {
+                Vector3 point = GetCubicPosition(
+                    fromPosition,
+                    control1,
+                    control2,
+                    toPosition,
+                    sample / (float)ConnectorSamples);
+                float distanceSquared = (point - currentWorldPosition).sqrMagnitude;
+                if (distanceSquared < nearestDistanceSquared)
+                {
+                    nearestDistanceSquared = distanceSquared;
+                    nearestSample = sample;
+                }
+            }
+
+            Vector3 previous = currentWorldPosition;
+            float distance = 0f;
+            for (int sample = nearestSample + 1; sample <= ConnectorSamples; sample++)
+            {
+                Vector3 current = GetCubicPosition(
+                    fromPosition,
+                    control1,
+                    control2,
+                    toPosition,
+                    sample / (float)ConnectorSamples);
+                distance += Vector3.Distance(previous, current);
+                previous = current;
+            }
+
+            if (nearestSample == ConnectorSamples)
+            {
+                distance = Vector3.Distance(currentWorldPosition, toPosition);
+            }
+
+            return distance;
+        }
+
+        private static void GetConnectorControls(
+            NetLane fromLane,
+            byte fromOffset,
+            Vector3 fromPosition,
+            NetLane toLane,
+            byte toEntryOffset,
+            byte toTargetOffset,
+            Vector3 toPosition,
+            out Vector3 control1,
+            out Vector3 control2)
+        {
+            Vector3 chord = toPosition - fromPosition;
+            float chordLength = chord.magnitude;
+            if (chordLength <= MinimumDirectionMagnitude)
+            {
+                control1 = fromPosition;
+                control2 = toPosition;
+                return;
+            }
+
+            int fromDirection = fromOffset >= 128 ? 1 : -1;
+            int toDirection = toTargetOffset >= toEntryOffset ? 1 : -1;
+            Vector3 fromTangent = GetArrivalDirection(fromLane, fromOffset, fromDirection);
+            Vector3 toTangent = GetDepartureDirection(toLane, toEntryOffset, toDirection);
+            Vector3 chordDirection = chord / chordLength;
+
+            if (!TryNormalize(ref fromTangent))
+            {
+                fromTangent = chordDirection;
+            }
+            if (!TryNormalize(ref toTangent))
+            {
+                toTangent = chordDirection;
+            }
+
+            float handleLength = Math.Min(
+                chordLength * ConnectorHandleScale,
+                MaxConnectorHandleLength);
+            control1 = fromPosition + (fromTangent * handleLength);
+            control2 = toPosition - (toTangent * handleLength);
+        }
+
+        private static Vector3 GetArrivalDirection(NetLane lane, byte offset, int direction)
+        {
+            int previousOffset = Math.Max(
+                0,
+                Math.Min(255, offset - (direction * TangentOffsetStep)));
+            return GetLanePosition(lane, offset) -
+                   GetLanePosition(lane, (byte)previousOffset);
+        }
+
+        private static Vector3 GetDepartureDirection(NetLane lane, byte offset, int direction)
+        {
+            int nextOffset = Math.Max(
+                0,
+                Math.Min(255, offset + (direction * TangentOffsetStep)));
+            return GetLanePosition(lane, (byte)nextOffset) -
+                   GetLanePosition(lane, offset);
+        }
+
+        private static bool TryNormalize(ref Vector3 direction)
+        {
+            float magnitude = direction.magnitude;
+            if (magnitude <= MinimumDirectionMagnitude || !IsFinite(magnitude))
+            {
+                return false;
+            }
+
+            direction /= magnitude;
+            return IsFinite(direction);
+        }
+
+        private static Vector3 GetCubicPosition(
+            Vector3 start,
+            Vector3 control1,
+            Vector3 control2,
+            Vector3 end,
+            float progress)
+        {
+            float inverse = 1f - progress;
+            float inverseSquared = inverse * inverse;
+            float progressSquared = progress * progress;
+            return (start * (inverseSquared * inverse)) +
+                   (control1 * (3f * inverseSquared * progress)) +
+                   (control2 * (3f * inverse * progressSquared)) +
+                   (end * (progressSquared * progress));
         }
 
         private static bool TryAddDistance(ref float total, float distance)

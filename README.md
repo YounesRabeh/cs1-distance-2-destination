@@ -71,7 +71,7 @@ The visual and behavioral criteria—actual panel layout, decreasing values on l
 
 The current source only reads the selected entity's existing `m_path`. It does not call `CreatePath`, start pathfinding, alter path units, add path references, scan the city, or write to simulation-owned vehicle, citizen, path, segment, or lane state.
 
-Different-lane transitions use the straight-line distance between vanilla-derived lane endpoints because the exact connector curve is constructed differently for each AI. Lane portions use vanilla's cached physical `NetLane.m_length`; no fixed distance per path position is assumed.
+Lane portions are measured by sampling vanilla's `NetLane` Bezier geometry; no fixed distance per path position is assumed. Different-lane transitions use a sampled, tangent-aligned cubic connector between vanilla-derived lane endpoints because the exact connector curve is constructed differently for each AI.
 
 ## License
 
