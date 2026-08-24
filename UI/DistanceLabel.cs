@@ -103,8 +103,10 @@ namespace RouteDistance.UI
                 container.height = requiredHeight;
             }
 
+            // The new row pushes every later vanilla row down, so the window must grow
+            // by the row's full height before adding the requested bottom padding.
             float requiredInfoPanelHeight =
-                row.absolutePosition.y + row.height + InfoPanelBottomPadding - infoPanel.absolutePosition.y;
+                originalInfoPanelHeight + row.height + InfoPanelBottomPadding;
             if (infoPanel.height < requiredInfoPanelHeight)
             {
                 infoPanel.height = requiredInfoPanelHeight;
