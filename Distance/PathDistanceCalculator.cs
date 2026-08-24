@@ -212,6 +212,9 @@ namespace RouteDistance.Distance
             Debug.LogException(exception);
         }
 
+        /// <summary>
+        /// Determines whether a vehicle is a live, spawned road vehicle supported by the calculator.
+        /// </summary>
         private static bool IsSupportedVehicle(Vehicle vehicle)
         {
             Vehicle.Flags flags = vehicle.m_flags;
@@ -225,6 +228,9 @@ namespace RouteDistance.Distance
             return info != null && (info.m_vehicleType & VehicleInfo.VehicleType.Car) != 0;
         }
 
+        /// <summary>
+        /// Determines whether a citizen instance is a live pedestrian with a stable path.
+        /// </summary>
         private static bool IsSupportedCitizenInstance(
             CitizenInstance instance,
             ushort instanceId,

@@ -78,6 +78,9 @@ namespace RouteDistance
             CleanupLabels();
         }
 
+        /// <summary>
+        /// Removes UI owned by both panel patches while isolating cleanup failures.
+        /// </summary>
         private static void CleanupLabels()
         {
             try

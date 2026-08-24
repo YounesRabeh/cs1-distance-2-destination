@@ -27,6 +27,9 @@ namespace RouteDistance.Patches
         private static uint lastCitizenId;
         private static float nextRefreshTime;
 
+        /// <summary>
+        /// Updates the selected pedestrian's distance row after vanilla refreshes the panel.
+        /// </summary>
         [HarmonyPostfix]
         private static void Postfix(CitizenWorldInfoPanel __instance)
         {
@@ -104,6 +107,9 @@ namespace RouteDistance.Patches
             nextRefreshTime = 0f;
         }
 
+        /// <summary>
+        /// Verifies that a panel is non-embedded and bound to the currently selected citizen.
+        /// </summary>
         private static bool RepresentsCurrentTopLevelCitizen(
             CitizenWorldInfoPanel panel,
             InstanceID selected)
@@ -131,6 +137,9 @@ namespace RouteDistance.Patches
                    panelInstance.Citizen == selected.Citizen;
         }
 
+        /// <summary>
+        /// Resolves a live, walking citizen to the instance that owns its pedestrian path.
+        /// </summary>
         private static ushort GetCitizenInstance(uint citizenId)
         {
             if (citizenId == 0 || !Singleton<CitizenManager>.exists)

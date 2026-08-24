@@ -22,6 +22,9 @@ namespace RouteDistance.Patches
         private static ushort lastVehicleId;
         private static float nextRefreshTime;
 
+        /// <summary>
+        /// Updates the selected vehicle's distance row after vanilla refreshes the panel.
+        /// </summary>
         [HarmonyPostfix]
         private static void Postfix(VehicleWorldInfoPanel __instance)
         {
@@ -96,6 +99,9 @@ namespace RouteDistance.Patches
             nextRefreshTime = 0f;
         }
 
+        /// <summary>
+        /// Resolves a trailer or consist member to the vehicle that owns the route path.
+        /// </summary>
         private static ushort GetFirstVehicle(ushort vehicleId)
         {
             if (vehicleId == 0 || !ColossalFramework.Singleton<VehicleManager>.exists)
@@ -114,6 +120,9 @@ namespace RouteDistance.Patches
             return manager.m_vehicles.m_buffer[vehicleId].GetFirstVehicle(vehicleId);
         }
 
+        /// <summary>
+        /// Detects a stationary vehicle whose flags or visible status indicate parking.
+        /// </summary>
         private static bool IsParkedVehicle(ushort vehicleId, string statusText)
         {
             if (vehicleId == 0 || !ColossalFramework.Singleton<VehicleManager>.exists)

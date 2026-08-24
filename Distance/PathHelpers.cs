@@ -227,24 +227,36 @@ namespace RouteDistance.Distance
             }
         }
 
+        /// <summary>
+        /// Converts vanilla's encoded path-position phase into a PathUnit position index.
+        /// </summary>
         private static int DecodePositionIndex(byte encodedPositionIndex)
         {
             // Vanilla PathVisualizer uses 0 for the initial 255 sentinel and index >> 1 otherwise.
             return encodedPositionIndex == byte.MaxValue ? 0 : encodedPositionIndex >> 1;
         }
 
+        /// <summary>
+        /// Checks that a path identifier can be safely dereferenced in the supplied buffer.
+        /// </summary>
         private static bool IsPathIdInRange(uint pathId, PathUnit[] pathBuffer)
         {
             return pathId != 0 && pathId < (uint)pathBuffer.Length &&
                    pathId < PathManager.MAX_PATHUNIT_COUNT;
         }
 
+        /// <summary>
+        /// Checks that a PathUnit is created and still referenced by the simulation.
+        /// </summary>
         private static bool IsAllocated(PathUnit unit)
         {
             return (unit.m_simulationFlags & PathUnit.SimulationFlags.FLAG_CREATED) != 0 &&
                    unit.m_referenceCount != 0;
         }
 
+        /// <summary>
+        /// Checks that pathfinding completed successfully for a PathUnit.
+        /// </summary>
         private static bool IsReady(PathUnit unit)
         {
             byte flags = unit.m_pathFindFlags;
@@ -252,6 +264,9 @@ namespace RouteDistance.Distance
                    (flags & (PathUnit.FLAG_QUEUED | PathUnit.FLAG_CALCULATING | PathUnit.FLAG_FAILED)) == 0;
         }
 
+        /// <summary>
+        /// Detects whether a PathUnit changed or was reused while its route was being read.
+        /// </summary>
         private static bool IsSameUnitSnapshot(PathUnit expected, PathUnit current)
         {
             return IsAllocated(current) &&
@@ -261,6 +276,9 @@ namespace RouteDistance.Distance
                    expected.m_pathFindFlags == current.m_pathFindFlags;
         }
 
+        /// <summary>
+        /// Checks that a path position resolves to a live lane in the current network buffers.
+        /// </summary>
         private static bool IsValidNetworkPosition(PathUnit.Position position, NetManager netManager)
         {
             uint laneId;
@@ -268,6 +286,9 @@ namespace RouteDistance.Distance
             return TryGetLane(position, netManager, out laneId, out lane);
         }
 
+        /// <summary>
+        /// Calculates the sampled distance between two consecutive route positions.
+        /// </summary>
         private static bool TryGetDistanceBetweenPositions(
             PathUnit.Position from,
             PathUnit.Position to,
@@ -318,6 +339,9 @@ namespace RouteDistance.Distance
             return IsFiniteNonNegative(meters);
         }
 
+        /// <summary>
+        /// Calculates only the untraversed part of the entity's current lane transition.
+        /// </summary>
         private static bool TryGetCurrentTransitionDistance(
             Vector3 currentWorldPosition,
             PathUnit.Position from,
@@ -369,6 +393,9 @@ namespace RouteDistance.Distance
             return IsFiniteNonNegative(meters);
         }
 
+        /// <summary>
+        /// Resolves and validates the network lane referenced by a path position.
+        /// </summary>
         private static bool TryGetLane(
             PathUnit.Position position,
             NetManager netManager,
@@ -412,6 +439,9 @@ namespace RouteDistance.Distance
             return lane.m_segment == position.m_segment && IsFiniteNonNegative(lane.m_length);
         }
 
+        /// <summary>
+        /// Checks that all network buffers required by distance calculation are available.
+        /// </summary>
         private static bool HasNetworkBuffers(NetManager netManager)
         {
             return netManager != null && netManager.m_segments != null &&
@@ -419,11 +449,17 @@ namespace RouteDistance.Distance
                    netManager.m_lanes.m_buffer != null;
         }
 
+        /// <summary>
+        /// Resolves a byte-normalized offset to a world position on a lane curve.
+        /// </summary>
         private static Vector3 GetLanePosition(NetLane lane, byte offset)
         {
             return lane.CalculatePosition(offset * (1f / 255f));
         }
 
+        /// <summary>
+        /// Approximates a partial lane's arc length by sampling its vanilla Bezier curve.
+        /// </summary>
         private static float GetLanePortionDistance(NetLane lane, byte fromOffset, byte toOffset)
         {
             int offsetDelta = Math.Abs((int)toOffset - fromOffset);
@@ -449,6 +485,9 @@ namespace RouteDistance.Distance
             return distance;
         }
 
+        /// <summary>
+        /// Approximates the full arc length of a tangent-aligned lane connector.
+        /// </summary>
         private static float GetConnectorDistance(
             NetLane fromLane,
             byte fromOffset,
@@ -488,6 +527,9 @@ namespace RouteDistance.Distance
             return distance;
         }
 
+        /// <summary>
+        /// Approximates the connector arc remaining after the entity's current position.
+        /// </summary>
         private static float GetRemainingConnectorDistance(
             Vector3 currentWorldPosition,
             NetLane fromLane,
@@ -551,6 +593,9 @@ namespace RouteDistance.Distance
             return distance;
         }
 
+        /// <summary>
+        /// Builds cubic control points from the connector chord and lane travel directions.
+        /// </summary>
         private static void GetConnectorControls(
             NetLane fromLane,
             byte fromOffset,
@@ -593,6 +638,9 @@ namespace RouteDistance.Distance
             control2 = toPosition - (toTangent * handleLength);
         }
 
+        /// <summary>
+        /// Estimates the direction of travel as a route approaches a lane offset.
+        /// </summary>
         private static Vector3 GetArrivalDirection(NetLane lane, byte offset, int direction)
         {
             int previousOffset = Math.Max(
@@ -602,6 +650,9 @@ namespace RouteDistance.Distance
                    GetLanePosition(lane, (byte)previousOffset);
         }
 
+        /// <summary>
+        /// Estimates the direction of travel as a route leaves a lane offset.
+        /// </summary>
         private static Vector3 GetDepartureDirection(NetLane lane, byte offset, int direction)
         {
             int nextOffset = Math.Max(
@@ -611,6 +662,9 @@ namespace RouteDistance.Distance
                    GetLanePosition(lane, offset);
         }
 
+        /// <summary>
+        /// Normalizes a finite, non-trivial direction vector in place.
+        /// </summary>
         private static bool TryNormalize(ref Vector3 direction)
         {
             float magnitude = direction.magnitude;
@@ -623,6 +677,9 @@ namespace RouteDistance.Distance
             return IsFinite(direction);
         }
 
+        /// <summary>
+        /// Evaluates a cubic Bezier curve at normalized progress.
+        /// </summary>
         private static Vector3 GetCubicPosition(
             Vector3 start,
             Vector3 control1,
@@ -639,6 +696,9 @@ namespace RouteDistance.Distance
                    (end * (progressSquared * progress));
         }
 
+        /// <summary>
+        /// Adds a finite non-negative distance while guarding the accumulated total.
+        /// </summary>
         private static bool TryAddDistance(ref float total, float distance)
         {
             if (!IsFiniteNonNegative(distance))
@@ -650,16 +710,25 @@ namespace RouteDistance.Distance
             return IsFiniteNonNegative(total);
         }
 
+        /// <summary>
+        /// Checks that every component of a world-space vector is finite.
+        /// </summary>
         private static bool IsFinite(Vector3 value)
         {
             return IsFinite(value.x) && IsFinite(value.y) && IsFinite(value.z);
         }
 
+        /// <summary>
+        /// Checks that a scalar is finite and non-negative.
+        /// </summary>
         private static bool IsFiniteNonNegative(float value)
         {
             return value >= 0f && IsFinite(value);
         }
 
+        /// <summary>
+        /// Checks that a scalar is neither NaN nor infinite.
+        /// </summary>
         private static bool IsFinite(float value)
         {
             return !float.IsNaN(value) && !float.IsInfinity(value);
