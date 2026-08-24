@@ -41,6 +41,7 @@ ScaffoldingReadMe.txt
 .env
 .dev-env/
 Directory.Build.user.props
+/build-and-install-local.sh
 
 # Others
 ~$*
