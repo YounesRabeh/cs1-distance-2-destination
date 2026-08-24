@@ -22,9 +22,9 @@ The implementation targets and compiles against the installed Cities: Skylines v
 
 - Cities: Skylines 1 game assemblies from a local installation
 - a .NET Framework/Mono C# build toolchain compatible with .NET 3.5
-- CitiesHarmony/Harmony v2 for the later runtime integration phase
+- [Harmony 2.2.2-0 (Mod Dependency)](https://steamcommunity.com/sharedfiles/filedetails/?id=2040656402) for the later runtime integration phase
 
-Game and CitiesHarmony DLLs are referenced with `Private=False`; they are never copied into the mod output.
+Game and CitiesHarmony DLLs are referenced with `Private=False`; they are never copied into the mod output. The dependency release is Harmony **2.2.2-0**. Its installed `CitiesHarmony.Harmony.dll` retains the separate managed assembly version `2.0.4.0`; that internal value is not the mod release version.
 
 ## Build configuration
 

@@ -53,7 +53,7 @@
       <HintPath>$(CitiesSkylinesManagedDir)/UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <!-- Reserved for the Phase 15 integration. Never copied into the mod output. -->
+    <!-- Installed Harmony 2.2.2-0 dependency; reserved for Phase 15 and never copied. -->
     <Reference Include="CitiesHarmony.Harmony" Condition="Exists('$(HarmonyDllPath)')">
       <HintPath>$(HarmonyDllPath)</HintPath>
       <Private>False</Private>

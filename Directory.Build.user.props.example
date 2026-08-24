@@ -4,7 +4,7 @@
     <!-- The directory containing Assembly-CSharp.dll, ICities.dll, and the other game assemblies. -->
     <CitiesSkylinesManagedDir>/path/to/Cities_Skylines/Cities_Data/Managed</CitiesSkylinesManagedDir>
 
-    <!-- CitiesHarmony's Harmony 2 implementation; it is referenced with Private=False. -->
+    <!-- Harmony 2.2.2-0 (Mod Dependency); referenced with Private=False. -->
     <HarmonyDllPath>/path/to/CitiesHarmony.Harmony.dll</HarmonyDllPath>
 
     <!-- Optional build/deployment overrides. -->

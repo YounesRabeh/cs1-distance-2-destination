@@ -12,6 +12,8 @@ The inspected files are the assemblies actually installed under:
 
 The inspection used the game's bundled Mono.Cecil against `Assembly-CSharp.dll`; it did not use recreated API definitions or third-party documentation.
 
+The installed patching dependency is the Workshop release **Harmony 2.2.2-0 (Mod Dependency)**, which provides HarmonyLib 2.2.2. Its `CitiesHarmony.Harmony.dll` reports managed assembly version `2.0.4.0`; these are different version identifiers. Harmony integration remains deferred to Phase 15, and the dependency assembly is never copied into Route Distance's output.
+
 ## World-info panels
 
 ### Normal road vehicles
