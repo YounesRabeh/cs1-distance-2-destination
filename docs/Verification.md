@@ -20,7 +20,9 @@ The official API produces one expected ICities 1.16/1.17 unification warning; th
 
 After each UI or geometry change, test:
 
-- Private, cargo, public-transport, and city-service vehicles
+- Private, cargo, public-transport, city-service, and bicycle vehicles
+- Active and pathless bicycles with After Dark, plus loading without the DLC
+- Bicycle visibility under All other vehicles with Pedestrians enabled and disabled
 - Walking citizens with active paths in English and non-English game languages
 - Idle or pathless citizens and citizens riding in vehicles
 - Parked, parking, and pathless road vehicles
@@ -31,12 +33,15 @@ After each UI or geometry change, test:
 - Metric and imperial formatting
 - Every visibility setting, including persistence after restart
 - Panel layout at different UI scales
+- Repeated supported/unsupported target switching with and without extra panel fields
+- Disabling a category while its distance row is visible
 - Mod disable/re-enable cleanup
 
 ## Expected behavior
 
 - Only one distance row is present.
 - The panel background extends below the final line.
+- Removing or disabling a row restores only its owned padding without cumulative growth.
 - Values generally decrease along an unchanged route.
 - Rerouting replaces the value safely.
 - A temporary read failure on a nonzero active route displays a dash.

@@ -30,7 +30,7 @@ namespace DistanceToDestination
         }
 
         /// <summary>
-        /// Gets or sets whether non-service road-vehicle panels show route distance.
+        /// Gets or sets whether non-service car and bicycle panels show route distance.
         /// </summary>
         internal static bool ShowOtherVehicles
         {

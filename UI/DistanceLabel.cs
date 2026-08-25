@@ -25,10 +25,10 @@ namespace DistanceToDestination.UI
         private UIPanel container;
         private UIComponent statusRow;
         private UIComponent infoPanel;
-        private float originalContainerHeight;
-        private float originalInfoPanelHeight;
-        private float appliedContainerHeight;
-        private float appliedInfoPanelHeight;
+        private float baselineContainerHeight;
+        private float baselineInfoPanelHeight;
+        private float ownedContainerGrowth;
+        private float ownedInfoPanelGrowth;
         private bool layoutApplied;
 
         /// <summary>
@@ -59,9 +59,9 @@ namespace DistanceToDestination.UI
 
                 statusRow = requestedStatusRow;
                 container = requestedContainer;
-                originalContainerHeight = container.height;
+                baselineContainerHeight = container.height;
                 infoPanel = requestedInfoPanel;
-                originalInfoPanelHeight = infoPanel.height;
+                baselineInfoPanelHeight = infoPanel.height;
 
                 UIPanel existing = container.Find<UIPanel>(RowName);
                 if (existing != null && existing.parent == container)
@@ -83,8 +83,8 @@ namespace DistanceToDestination.UI
             else if (!layoutApplied)
             {
                 // The prefix restored the previous baseline before vanilla refreshed it.
-                originalContainerHeight = container.height;
-                originalInfoPanelHeight = infoPanel.height;
+                baselineContainerHeight = container.height;
+                baselineInfoPanelHeight = infoPanel.height;
             }
 
             ApplyLayout(styleSource);
@@ -163,10 +163,10 @@ namespace DistanceToDestination.UI
             container = null;
             statusRow = null;
             infoPanel = null;
-            originalContainerHeight = 0f;
-            originalInfoPanelHeight = 0f;
-            appliedContainerHeight = 0f;
-            appliedInfoPanelHeight = 0f;
+            baselineContainerHeight = 0f;
+            baselineInfoPanelHeight = 0f;
+            ownedContainerGrowth = 0f;
+            ownedInfoPanelGrowth = 0f;
             layoutApplied = false;
         }
 
@@ -176,7 +176,7 @@ namespace DistanceToDestination.UI
         private void ApplyLayout(UILabel styleSource)
         {
             row.width = statusRow.width;
-            row.height = Math.Max(styleSource.height, statusRow.height);
+            row.height = Math.Max(styleSource.height, 20f);
             row.relativePosition = new Vector3(
                 statusRow.relativePosition.x,
                 statusRow.relativePosition.y + statusRow.height + VerticalSpacing,
@@ -200,11 +200,13 @@ namespace DistanceToDestination.UI
 
             float requiredContainerHeight =
                 row.relativePosition.y + row.height + VerticalSpacing;
-            container.height = Math.Max(originalContainerHeight, requiredContainerHeight);
-            infoPanel.height =
-                originalInfoPanelHeight + row.height + InfoPanelBottomPadding;
-            appliedContainerHeight = container.height;
-            appliedInfoPanelHeight = infoPanel.height;
+            float targetContainerHeight =
+                Math.Max(baselineContainerHeight, requiredContainerHeight);
+            ownedContainerGrowth = targetContainerHeight - baselineContainerHeight;
+            container.height = targetContainerHeight;
+
+            ownedInfoPanelGrowth = ownedContainerGrowth + InfoPanelBottomPadding;
+            infoPanel.height = baselineInfoPanelHeight + ownedInfoPanelGrowth;
             row.isVisible = true;
             layoutApplied = true;
         }
@@ -219,27 +221,32 @@ namespace DistanceToDestination.UI
                 return;
             }
 
-            if (container != null)
-            {
-                // Do not overwrite a resize performed after this label applied its layout.
-                if (Math.Abs(container.height - appliedContainerHeight) < 0.01f)
-                {
-                    container.height = originalContainerHeight;
-                }
-            }
+            RemoveOwnedGrowth(container, baselineContainerHeight, ownedContainerGrowth);
+            RemoveOwnedGrowth(infoPanel, baselineInfoPanelHeight, ownedInfoPanelGrowth);
 
-            if (infoPanel != null)
-            {
-                // The next vanilla refresh becomes the new baseline when sizes differ.
-                if (Math.Abs(infoPanel.height - appliedInfoPanelHeight) < 0.01f)
-                {
-                    infoPanel.height = originalInfoPanelHeight;
-                }
-            }
-
-            appliedContainerHeight = 0f;
-            appliedInfoPanelHeight = 0f;
+            ownedContainerGrowth = 0f;
+            ownedInfoPanelGrowth = 0f;
             layoutApplied = false;
+        }
+
+        /// <summary>
+        /// Removes only this label's recorded growth while preserving later external growth.
+        /// </summary>
+        private static void RemoveOwnedGrowth(
+            UIComponent component,
+            float baselineHeight,
+            float ownedGrowth)
+        {
+            if (component == null || ownedGrowth <= 0f)
+            {
+                return;
+            }
+
+            float heightWithOwnedGrowth = baselineHeight + ownedGrowth;
+            if (component.height >= heightWithOwnedGrowth - 0.01f)
+            {
+                component.height = Math.Max(0f, component.height - ownedGrowth);
+            }
         }
 
         /// <summary>

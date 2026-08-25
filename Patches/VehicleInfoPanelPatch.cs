@@ -1,4 +1,4 @@
-// Adds a route-distance row to active road-vehicle information panels.
+// Adds a route-distance row to active supported-vehicle information panels.
 // Removes that row for stationary parked vehicles that have no active trip to show.
 using System;
 using ColossalFramework.UI;

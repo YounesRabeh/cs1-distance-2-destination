@@ -8,7 +8,7 @@ Distance 2 Destination is a **Cities: Skylines (CS1)** mod that shows how far a 
 ## Features
 
 - Shows the remaining route distance in the normal information window.
-- Supports service vehicles, other road vehicles, and pedestrians.
+- Supports service vehicles, other road vehicles, bicycles, and pedestrians.
 - Supports metric and imperial units.
 - Hides the field when there is no useful active trip to display.
 - Updates automatically as the selected vehicle or citizen moves.
@@ -22,7 +22,7 @@ Distance 2 Destination does not include Harmony itself. Subscribe to the Harmony
 
 ## Using the mod
 
-Enable **Distance 2 Destination vx.x.x** in Content Manager, load a city, and select a moving road vehicle or pedestrian. The remaining distance appears below the normal activity line.
+Enable **Distance 2 Destination vx.x.x** in Content Manager, load a city, and select a moving road vehicle, bicycle, or pedestrian. The remaining distance appears below the normal activity line.
 
 Open **Options > Mods Settings > Distance 2 Destination vx.x.x** to choose what the mod displays and whether it uses metric or imperial units.
 

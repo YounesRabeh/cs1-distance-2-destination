@@ -68,7 +68,7 @@ namespace DistanceToDestination.Distance
         }
 
         /// <summary>
-        /// Determines whether the selected vehicle is a supported road vehicle with an active path.
+        /// Determines whether the selected car or bicycle has an active supported path.
         /// </summary>
         internal static bool SupportsVehicleWithActivePath(ushort vehicleId)
         {
@@ -252,7 +252,7 @@ namespace DistanceToDestination.Distance
         }
 
         /// <summary>
-        /// Determines whether a vehicle is a live, spawned road vehicle supported by the calculator.
+        /// Determines whether a vehicle is a live, spawned car or bicycle supported by the calculator.
         /// </summary>
         private static bool IsSupportedVehicle(Vehicle vehicle)
         {
@@ -264,7 +264,9 @@ namespace DistanceToDestination.Distance
             }
 
             VehicleInfo info = vehicle.Info;
-            return info != null && (info.m_vehicleType & VehicleInfo.VehicleType.Car) != 0;
+            VehicleInfo.VehicleType supportedTypes =
+                VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Bicycle;
+            return info != null && (info.m_vehicleType & supportedTypes) != 0;
         }
 
         /// <summary>

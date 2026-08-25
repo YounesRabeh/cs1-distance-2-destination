@@ -15,7 +15,7 @@ The main components are:
 
 ## Supported entities
 
-Vehicles must be created, spawned road vehicles with a nonzero active path. A trailer or consist member is resolved to the first vehicle that owns the route.
+Vehicles must be created, spawned cars or bicycles with a nonzero active path. A trailer or consist member is resolved to the first vehicle that owns the route. Bicycle support uses the base game's vehicle type and path data, so it does not add an After Dark dependency.
 
 Citizens must have a live walking `CitizenInstance`, must be on a path, and must not be entering or riding a vehicle. Embedded citizen panels inside private-vehicle windows are ignored.
 
@@ -54,7 +54,7 @@ The accumulated value uses game world units as metres. Unit selection affects fo
 
 Harmony postfixes run after vanilla updates `VehicleWorldInfoPanel` or `CitizenWorldInfoPanel`. Each patch verifies that its own top-level panel and selected entity match before attaching UI.
 
-The distance row is a sibling below the vanilla Status row. The containing information window grows by the row height plus bottom padding. Removing the row restores the original sizes.
+The distance row is a sibling below the vanilla Status row. Its height comes from the styled Status label rather than a potentially enlarged parent. The label records its exact container and window growth; refresh and cleanup subtract only that owned growth so repeated target changes cannot accumulate padding and unrelated UI additions remain intact.
 
 The selected route is recalculated at most once every 0.75 seconds while a supported panel is visible. No city-wide scan or background worker is used.
 
