@@ -20,7 +20,7 @@ Distance to destination: 500 m
 
 The displayed value updates while the entity moves. Values are rounded upward to remain readable. A dash means an active route temporarily cannot be read, which can happen during rerouting or arrival.
 
-The field is shown from the entity's live route state, so it works independently of the game's language. Cars and bicycles use their vehicle route, while a cyclist never receives a duplicate pedestrian row. It is hidden for idle or pathless citizens, citizens riding in vehicles, stationary parked vehicles, pathless supported vehicles, and unsupported vehicle types. Trains, metros, aircraft, ships, helicopters, and monorails therefore keep their original vanilla panel without an unavailable distance row.
+The field is shown from the entity's live route state, so it works independently of the game's language. Cars use their vehicle route; bicycles use the cyclist's active route because the game simulates a bicycle through its rider. A cyclist never receives a duplicate pedestrian row. The field is hidden for idle or pathless citizens, citizens riding in non-bicycle vehicles, stationary parked vehicles, pathless supported vehicles, and unsupported vehicle types. Trains, metros, aircraft, ships, helicopters, and monorails therefore keep their original vanilla panel without an unavailable distance row.
 
 Bicycle support is automatically available with After Dark. The mod has no DLC dependency and continues to work normally when bicycles are unavailable.
 

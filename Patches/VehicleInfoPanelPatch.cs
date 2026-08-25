@@ -70,6 +70,13 @@ namespace DistanceToDestination.Patches
             {
                 if (__instance != null && __instance.component != null)
                 {
+                    if (GetPanelVehicleId(__instance) != 0)
+                    {
+                        // A hidden citizen panel receives no refresh after this selection change.
+                        // Restore its owned size before vanilla and other mods size this panel.
+                        CitizenInfoPanelPatch.Cleanup();
+                    }
+
                     Label.PrepareForVanillaRefresh(__instance.component);
                 }
             }
@@ -99,6 +106,12 @@ namespace DistanceToDestination.Patches
                     return;
                 }
 
+                ushort vehicleId = GetPanelVehicleId(__instance);
+                if (vehicleId == 0)
+                {
+                    return;
+                }
+
                 if (!ShouldShowForPanel(__instance))
                 {
                     Label.Remove();
@@ -107,7 +120,6 @@ namespace DistanceToDestination.Patches
                     return;
                 }
 
-                ushort vehicleId = GetPanelVehicleId(__instance);
                 vehicleId = GetFirstVehicle(vehicleId);
                 UILabel status = __instance.Find<UILabel>("Status");
 

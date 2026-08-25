@@ -37,6 +37,14 @@ namespace DistanceToDestination.Patches
             {
                 if (__instance != null && __instance.component != null)
                 {
+                    InstanceID selected = WorldInfoPanel.GetCurrentInstanceID();
+                    if (RepresentsCurrentTopLevelCitizen(__instance, selected))
+                    {
+                        // A hidden vehicle panel receives no refresh after this selection change.
+                        // Restore its owned size before vanilla and other mods size this panel.
+                        VehicleInfoPanelPatch.Cleanup();
+                    }
+
                     Label.PrepareForVanillaRefresh(__instance.component);
                 }
             }
@@ -61,17 +69,17 @@ namespace DistanceToDestination.Patches
                     return;
                 }
 
+                InstanceID selected = WorldInfoPanel.GetCurrentInstanceID();
+                if (!RepresentsCurrentTopLevelCitizen(__instance, selected))
+                {
+                    return;
+                }
+
                 if (!ModSettings.ShowPedestrians)
                 {
                     Label.Remove();
                     lastCitizenId = 0;
                     nextRefreshTime = 0f;
-                    return;
-                }
-
-                InstanceID selected = WorldInfoPanel.GetCurrentInstanceID();
-                if (!RepresentsCurrentTopLevelCitizen(__instance, selected))
-                {
                     return;
                 }
 

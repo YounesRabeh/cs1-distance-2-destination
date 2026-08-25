@@ -68,7 +68,7 @@ namespace DistanceToDestination.Distance
         }
 
         /// <summary>
-        /// Determines whether the selected car or bicycle has an active supported path.
+        /// Determines whether the selected car or rider-owned bicycle has an active supported path.
         /// </summary>
         internal static bool SupportsVehicleWithActivePath(ushort vehicleId)
         {
@@ -78,11 +78,27 @@ namespace DistanceToDestination.Distance
             }
 
             VehicleManager manager = Singleton<VehicleManager>.instance;
-            return manager != null && manager.m_vehicles != null &&
-                   manager.m_vehicles.m_buffer != null &&
-                   vehicleId < manager.m_vehicles.m_buffer.Length &&
-                   IsSupportedVehicle(manager.m_vehicles.m_buffer[vehicleId]) &&
-                   manager.m_vehicles.m_buffer[vehicleId].m_path != 0;
+            if (manager == null || manager.m_vehicles == null ||
+                manager.m_vehicles.m_buffer == null ||
+                vehicleId >= manager.m_vehicles.m_buffer.Length)
+            {
+                return false;
+            }
+
+            Vehicle vehicle = manager.m_vehicles.m_buffer[vehicleId];
+            if (!IsSupportedVehicle(vehicle))
+            {
+                return false;
+            }
+
+            if (!IsBicycle(vehicle))
+            {
+                return vehicle.m_path != 0;
+            }
+
+            ushort riderInstanceId;
+            return TryGetBicycleRiderInstance(vehicleId, ref vehicle, out riderInstanceId) &&
+                   SupportsCitizenInstanceWithActivePath(riderInstanceId, vehicleId);
         }
 
         /// <summary>
@@ -102,7 +118,8 @@ namespace DistanceToDestination.Distance
                    IsSupportedCitizenInstance(
                        manager.m_instances.m_buffer[citizenInstanceId],
                        citizenInstanceId,
-                       manager) &&
+                       manager,
+                       0) &&
                    manager.m_instances.m_buffer[citizenInstanceId].m_path != 0;
         }
 
@@ -139,6 +156,16 @@ namespace DistanceToDestination.Distance
                     return false;
                 }
 
+                if (IsBicycle(vehicle))
+                {
+                    return TryGetBicycleRemainingPath(
+                        vehicleId,
+                        ref vehicle,
+                        out positions,
+                        out pathPositionIndex,
+                        out worldPosition);
+                }
+
                 uint pathId = vehicle.m_path;
                 pathPositionIndex = vehicle.m_pathPositionIndex;
                 if (pathId == 0 ||
@@ -169,6 +196,34 @@ namespace DistanceToDestination.Distance
         }
 
         /// <summary>
+        /// Captures a bicycle route from the live citizen instance that drives its simulation.
+        /// </summary>
+        private static bool TryGetBicycleRemainingPath(
+            ushort vehicleId,
+            ref Vehicle vehicle,
+            out List<PathUnit.Position> positions,
+            out byte pathPositionIndex,
+            out Vector3 worldPosition)
+        {
+            positions = null;
+            pathPositionIndex = 0;
+            worldPosition = Vector3.zero;
+
+            ushort riderInstanceId;
+            if (!TryGetBicycleRiderInstance(vehicleId, ref vehicle, out riderInstanceId))
+            {
+                return false;
+            }
+
+            return TryGetCitizenRemainingPath(
+                riderInstanceId,
+                vehicleId,
+                out positions,
+                out pathPositionIndex,
+                out worldPosition);
+        }
+
+        /// <summary>
         /// Captures a consistent pedestrian-path snapshot and its current world position.
         /// </summary>
         internal static bool TryGetCitizenRemainingPath(
@@ -183,42 +238,12 @@ namespace DistanceToDestination.Distance
 
             try
             {
-                if (citizenInstanceId == 0 || !Singleton<CitizenManager>.exists)
-                {
-                    return false;
-                }
-
-                CitizenManager manager = Singleton<CitizenManager>.instance;
-                if (manager == null || manager.m_instances == null || manager.m_instances.m_buffer == null ||
-                    citizenInstanceId >= manager.m_instances.m_buffer.Length)
-                {
-                    return false;
-                }
-
-                CitizenInstance instance = manager.m_instances.m_buffer[citizenInstanceId];
-                if (!IsSupportedCitizenInstance(instance, citizenInstanceId, manager))
-                {
-                    return false;
-                }
-
-                uint pathId = instance.m_path;
-                pathPositionIndex = instance.m_pathPositionIndex;
-                if (pathId == 0 ||
-                    !PathHelpers.TryGetRemainingPositions(pathId, pathPositionIndex, out positions))
-                {
-                    return false;
-                }
-
-                CitizenInstance current = manager.m_instances.m_buffer[citizenInstanceId];
-                if (!IsSupportedCitizenInstance(current, citizenInstanceId, manager) ||
-                    current.m_path != pathId || current.m_pathPositionIndex != pathPositionIndex)
-                {
-                    positions = null;
-                    return false;
-                }
-
-                worldPosition = current.GetLastFramePosition();
-                return true;
+                return TryGetCitizenRemainingPath(
+                    citizenInstanceId,
+                    0,
+                    out positions,
+                    out pathPositionIndex,
+                    out worldPosition);
             }
             catch (Exception exception)
             {
@@ -228,6 +253,67 @@ namespace DistanceToDestination.Distance
                 worldPosition = Vector3.zero;
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Captures a citizen-owned path while enforcing its expected active vehicle relationship.
+        /// </summary>
+        private static bool TryGetCitizenRemainingPath(
+            ushort citizenInstanceId,
+            ushort expectedVehicleId,
+            out List<PathUnit.Position> positions,
+            out byte pathPositionIndex,
+            out Vector3 worldPosition)
+        {
+            positions = null;
+            pathPositionIndex = 0;
+            worldPosition = Vector3.zero;
+
+            if (citizenInstanceId == 0 || !Singleton<CitizenManager>.exists)
+            {
+                return false;
+            }
+
+            CitizenManager manager = Singleton<CitizenManager>.instance;
+            if (manager == null || manager.m_instances == null ||
+                manager.m_instances.m_buffer == null ||
+                citizenInstanceId >= manager.m_instances.m_buffer.Length)
+            {
+                return false;
+            }
+
+            CitizenInstance instance = manager.m_instances.m_buffer[citizenInstanceId];
+            if (!IsSupportedCitizenInstance(
+                    instance,
+                    citizenInstanceId,
+                    manager,
+                    expectedVehicleId))
+            {
+                return false;
+            }
+
+            uint pathId = instance.m_path;
+            pathPositionIndex = instance.m_pathPositionIndex;
+            if (pathId == 0 ||
+                !PathHelpers.TryGetRemainingPositions(pathId, pathPositionIndex, out positions))
+            {
+                return false;
+            }
+
+            CitizenInstance current = manager.m_instances.m_buffer[citizenInstanceId];
+            if (!IsSupportedCitizenInstance(
+                    current,
+                    citizenInstanceId,
+                    manager,
+                    expectedVehicleId) ||
+                current.m_path != pathId || current.m_pathPositionIndex != pathPositionIndex)
+            {
+                positions = null;
+                return false;
+            }
+
+            worldPosition = current.GetLastFramePosition();
+            return true;
         }
 
         /// <summary>
@@ -270,12 +356,89 @@ namespace DistanceToDestination.Distance
         }
 
         /// <summary>
+        /// Determines whether a supported vehicle is the citizen-driven bicycle proxy.
+        /// </summary>
+        private static bool IsBicycle(Vehicle vehicle)
+        {
+            VehicleInfo info = vehicle.Info;
+            return info != null &&
+                   (info.m_vehicleType & VehicleInfo.VehicleType.Bicycle) != 0;
+        }
+
+        /// <summary>
+        /// Resolves the live citizen instance that owns and advances a bicycle's route.
+        /// </summary>
+        private static bool TryGetBicycleRiderInstance(
+            ushort vehicleId,
+            ref Vehicle vehicle,
+            out ushort riderInstanceId)
+        {
+            riderInstanceId = 0;
+            VehicleInfo info = vehicle.Info;
+            if (info == null || info.m_vehicleAI == null || !IsBicycle(vehicle) ||
+                !Singleton<CitizenManager>.exists)
+            {
+                return false;
+            }
+
+            InstanceID owner = info.m_vehicleAI.GetOwnerID(vehicleId, ref vehicle);
+            if (owner.Type != InstanceType.Citizen || owner.Citizen == 0)
+            {
+                return false;
+            }
+
+            CitizenManager manager = Singleton<CitizenManager>.instance;
+            if (manager == null || manager.m_citizens == null ||
+                manager.m_citizens.m_buffer == null ||
+                owner.Citizen >= (uint)manager.m_citizens.m_buffer.Length)
+            {
+                return false;
+            }
+
+            Citizen citizen = manager.m_citizens.m_buffer[(int)owner.Citizen];
+            if ((citizen.m_flags & Citizen.Flags.Created) == 0 ||
+                (citizen.m_flags & Citizen.Flags.Dead) != 0 ||
+                citizen.m_vehicle != vehicleId || citizen.m_instance == 0)
+            {
+                return false;
+            }
+
+            riderInstanceId = citizen.m_instance;
+            return true;
+        }
+
+        /// <summary>
+        /// Determines whether a citizen-owned route is active for a particular bicycle.
+        /// </summary>
+        private static bool SupportsCitizenInstanceWithActivePath(
+            ushort citizenInstanceId,
+            ushort expectedVehicleId)
+        {
+            if (citizenInstanceId == 0 || !Singleton<CitizenManager>.exists)
+            {
+                return false;
+            }
+
+            CitizenManager manager = Singleton<CitizenManager>.instance;
+            return manager != null && manager.m_instances != null &&
+                   manager.m_instances.m_buffer != null &&
+                   citizenInstanceId < manager.m_instances.m_buffer.Length &&
+                   IsSupportedCitizenInstance(
+                       manager.m_instances.m_buffer[citizenInstanceId],
+                       citizenInstanceId,
+                       manager,
+                       expectedVehicleId) &&
+                   manager.m_instances.m_buffer[citizenInstanceId].m_path != 0;
+        }
+
+        /// <summary>
         /// Determines whether a citizen instance is a live pedestrian with a stable path.
         /// </summary>
         private static bool IsSupportedCitizenInstance(
             CitizenInstance instance,
             ushort instanceId,
-            CitizenManager manager)
+            CitizenManager manager,
+            ushort expectedVehicleId)
         {
             CitizenInstance.Flags flags = instance.m_flags;
             if ((flags & CitizenInstance.Flags.Created) == 0 ||
@@ -296,7 +459,8 @@ namespace DistanceToDestination.Distance
             Citizen citizen = manager.m_citizens.m_buffer[(int)instance.m_citizen];
             return (citizen.m_flags & Citizen.Flags.Created) != 0 &&
                    (citizen.m_flags & Citizen.Flags.Dead) == 0 &&
-                   citizen.m_instance == instanceId && citizen.m_vehicle == 0;
+                   citizen.m_instance == instanceId &&
+                   citizen.m_vehicle == expectedVehicleId;
         }
     }
 }

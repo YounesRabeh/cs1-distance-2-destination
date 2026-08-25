@@ -15,7 +15,7 @@ The main components are:
 
 ## Supported entities
 
-Vehicles must be created, spawned cars or bicycles with a nonzero active path. A trailer or consist member is resolved to the first vehicle that owns the route. Bicycle support uses the base game's vehicle type and path data, so it does not add an After Dark dependency.
+Vehicles must be created and spawned. Cars require a nonzero vehicle path, while bicycles resolve their owning cyclist and require a nonzero path on that live `CitizenInstance`. A trailer or consist member is resolved to the first vehicle that owns the route. Bicycle support uses types already present in the base game assembly, so it does not add an After Dark dependency.
 
 Citizens must have a live walking `CitizenInstance`, must be on a path, and must not be entering or riding a vehicle. Embedded citizen panels inside private-vehicle windows are ignored.
 
@@ -52,7 +52,7 @@ The accumulated value uses game world units as metres. Unit selection affects fo
 
 ## Display and refresh
 
-Harmony postfixes run after vanilla updates a concrete vehicle panel or `CitizenWorldInfoPanel`. Vehicle overrides and their nested base calls are depth-tracked so layout runs once, after the outermost panel has finished binding all vanilla fields. Each patch verifies that its own top-level panel and selected entity match before attaching UI.
+Harmony postfixes run after vanilla updates a concrete vehicle panel or `CitizenWorldInfoPanel`. Vehicle overrides and their nested base calls are depth-tracked so layout runs once, after the outermost panel has finished binding all vanilla fields. Each patch verifies that its own top-level panel and selected entity match before attaching UI. Its prefix also releases layout owned by the other top-level panel type before vanilla and other panel mods recalculate heights; this prevents stale vehicle or citizen sizing from crossing a selection change.
 
 The distance row is a sibling below the vanilla Status row. Its height comes from the styled Status label rather than a potentially enlarged parent. The label records its exact container and window growth; refresh and cleanup subtract only that owned growth so repeated target changes cannot accumulate padding and unrelated UI additions remain intact.
 
