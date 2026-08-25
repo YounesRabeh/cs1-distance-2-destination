@@ -5,7 +5,7 @@
 1. Install Cities: Skylines 1.
 2. Subscribe to **Harmony 2.2.2-0 (Mod Dependency)** on Steam Workshop.
 3. Install Distance 2 Destination.
-4. Open **Content Manager > Mods** and enable **Distance 2 Destination v1.1.1**.
+4. Open **Content Manager > Mods** and enable **Distance 2 Destination v1.1.2**.
 5. Restart the game after replacing a local build of the mod.
 
 Distance 2 Destination includes the small CitiesHarmony API helper, but it does not include the Harmony implementation. Harmony must be installed separately through its Workshop item.
@@ -20,11 +20,11 @@ Distance to destination: 500 m
 
 The displayed value updates while the entity moves. Values are rounded upward to remain readable. A dash means the game temporarily has no stable route available, which can happen during rerouting or arrival.
 
-The field is hidden for idle citizens without a **Going...** activity and for stationary parked vehicles.
+The field is hidden for idle citizens without a **Going...** activity, stationary parked vehicles, and vehicle types that the current route calculator does not support. Unsupported trains, metros, aircraft, ships, helicopters, and monorails therefore keep their original vanilla panel without an unavailable distance row.
 
 ## Settings
 
-Open **Options > Mods Settings > Distance 2 Destination v1.1.1**.
+Open **Options > Mods Settings > Distance 2 Destination v1.1.2**.
 
 The **Show distance for** section contains three independent options, all enabled by default:
 

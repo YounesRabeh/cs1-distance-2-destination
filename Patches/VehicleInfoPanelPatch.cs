@@ -49,7 +49,8 @@ namespace DistanceToDestination.Patches
                 vehicleId = GetFirstVehicle(vehicleId);
                 UILabel status = __instance.Find<UILabel>("Status");
 
-                if (vehicleId == 0 || IsParkedVehicle(
+                if (vehicleId == 0 || !PathDistanceCalculator.SupportsVehicle(vehicleId) ||
+                    IsParkedVehicle(
                     vehicleId,
                     status == null ? null : status.text))
                 {

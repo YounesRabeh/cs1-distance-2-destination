@@ -68,6 +68,23 @@ namespace DistanceToDestination.Distance
         }
 
         /// <summary>
+        /// Determines whether the selected vehicle is a live road vehicle supported by the calculator.
+        /// </summary>
+        internal static bool SupportsVehicle(ushort vehicleId)
+        {
+            if (vehicleId == 0 || !Singleton<VehicleManager>.exists)
+            {
+                return false;
+            }
+
+            VehicleManager manager = Singleton<VehicleManager>.instance;
+            return manager != null && manager.m_vehicles != null &&
+                   manager.m_vehicles.m_buffer != null &&
+                   vehicleId < manager.m_vehicles.m_buffer.Length &&
+                   IsSupportedVehicle(manager.m_vehicles.m_buffer[vehicleId]);
+        }
+
+        /// <summary>
         /// Captures a consistent vehicle-path snapshot and its current world position.
         /// </summary>
         internal static bool TryGetVehicleRemainingPath(
