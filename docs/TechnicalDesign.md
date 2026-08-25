@@ -52,7 +52,7 @@ The accumulated value uses game world units as metres. Unit selection affects fo
 
 ## Display and refresh
 
-Harmony postfixes run after vanilla updates `VehicleWorldInfoPanel` or `CitizenWorldInfoPanel`. Each patch verifies that its own top-level panel and selected entity match before attaching UI.
+Harmony postfixes run after vanilla updates a concrete vehicle panel or `CitizenWorldInfoPanel`. Vehicle overrides and their nested base calls are depth-tracked so layout runs once, after the outermost panel has finished binding all vanilla fields. Each patch verifies that its own top-level panel and selected entity match before attaching UI.
 
 The distance row is a sibling below the vanilla Status row. Its height comes from the styled Status label rather than a potentially enlarged parent. The label records its exact container and window growth; refresh and cleanup subtract only that owned growth so repeated target changes cannot accumulate padding and unrelated UI additions remain intact.
 

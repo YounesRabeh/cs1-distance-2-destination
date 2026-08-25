@@ -205,7 +205,7 @@ namespace DistanceToDestination.UI
             ownedContainerGrowth = targetContainerHeight - baselineContainerHeight;
             container.height = targetContainerHeight;
 
-            ownedInfoPanelGrowth = ownedContainerGrowth + InfoPanelBottomPadding;
+            ownedInfoPanelGrowth = row.height + InfoPanelBottomPadding;
             infoPanel.height = baselineInfoPanelHeight + ownedInfoPanelGrowth;
             row.isVisible = true;
             layoutApplied = true;

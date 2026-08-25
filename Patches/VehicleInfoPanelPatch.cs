@@ -1,6 +1,8 @@
 // Adds a route-distance row to active supported-vehicle information panels.
 // Removes that row for stationary parked vehicles that have no active trip to show.
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 using ColossalFramework.UI;
 using HarmonyLib;
 using DistanceToDestination.Distance;
@@ -12,22 +14,58 @@ namespace DistanceToDestination.Patches
     /// <summary>
     /// Refreshes the vehicle distance row after vanilla binds its information panel.
     /// </summary>
-    [HarmonyPatch(typeof(VehicleWorldInfoPanel), "UpdateBindings")]
+    [HarmonyPatch]
     internal static class VehicleInfoPanelPatch
     {
         private const float RefreshInterval = 0.75f;
         private const float StationaryVelocitySquared = 0.0001f;
 
+        private static readonly FieldInfo InstanceIdField =
+            AccessTools.Field(typeof(WorldInfoPanel), "m_InstanceID");
         private static readonly DistanceLabel Label = new DistanceLabel();
+        private static int bindingDepth;
         private static ushort lastVehicleId;
         private static float nextRefreshTime;
 
         /// <summary>
-        /// Restores the vanilla panel baseline before vanilla refreshes its bindings.
+        /// Selects the base binding method and every concrete vanilla vehicle-panel override.
+        /// </summary>
+        private static IEnumerable<MethodBase> TargetMethods()
+        {
+            Type[] panelTypes =
+            {
+                typeof(VehicleWorldInfoPanel),
+                typeof(CitizenVehicleWorldInfoPanel),
+                typeof(CityServiceVehicleWorldInfoPanel),
+                typeof(PublicTransportVehicleWorldInfoPanel),
+                typeof(RaceVehicleWorldInfoPanel),
+                typeof(TouristVehicleWorldInfoPanel)
+            };
+
+            HashSet<MethodBase> methods = new HashSet<MethodBase>();
+            for (int index = 0; index < panelTypes.Length; index++)
+            {
+                MethodInfo method = AccessTools.DeclaredMethod(panelTypes[index], "UpdateBindings");
+                if (method != null && methods.Add(method))
+                {
+                    yield return method;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Restores layout once before the outermost vehicle panel refresh begins.
         /// </summary>
         [HarmonyPrefix]
-        private static void Prefix(VehicleWorldInfoPanel __instance)
+        private static void Prefix(VehicleWorldInfoPanel __instance, out bool __state)
         {
+            __state = bindingDepth == 0;
+            bindingDepth++;
+            if (!__state)
+            {
+                return;
+            }
+
             try
             {
                 if (__instance != null && __instance.component != null)
@@ -45,11 +83,16 @@ namespace DistanceToDestination.Patches
         /// Updates the selected vehicle's distance row after vanilla refreshes the panel.
         /// </summary>
         [HarmonyPostfix]
-        private static void Postfix(VehicleWorldInfoPanel __instance)
+        private static void Postfix(VehicleWorldInfoPanel __instance, bool __state)
         {
             bool activePathConfirmed = false;
             try
             {
+                if (!__state)
+                {
+                    return;
+                }
+
                 if (__instance == null || __instance.component == null ||
                     !__instance.component.isVisible)
                 {
@@ -64,8 +107,7 @@ namespace DistanceToDestination.Patches
                     return;
                 }
 
-                InstanceID selected = WorldInfoPanel.GetCurrentInstanceID();
-                ushort vehicleId = selected.Type == InstanceType.Vehicle ? selected.Vehicle : (ushort)0;
+                ushort vehicleId = GetPanelVehicleId(__instance);
                 vehicleId = GetFirstVehicle(vehicleId);
                 UILabel status = __instance.Find<UILabel>("Status");
 
@@ -124,6 +166,13 @@ namespace DistanceToDestination.Patches
 
                 PathDistanceCalculator.LogUnexpected(exception);
             }
+            finally
+            {
+                if (bindingDepth > 0)
+                {
+                    bindingDepth--;
+                }
+            }
         }
 
         /// <summary>
@@ -132,6 +181,7 @@ namespace DistanceToDestination.Patches
         internal static void Cleanup()
         {
             Label.Remove();
+            bindingDepth = 0;
             lastVehicleId = 0;
             nextRefreshTime = 0f;
         }
@@ -144,6 +194,30 @@ namespace DistanceToDestination.Patches
             return panel is CityServiceVehicleWorldInfoPanel
                 ? ModSettings.ShowServiceVehicles
                 : ModSettings.ShowOtherVehicles;
+        }
+
+        /// <summary>
+        /// Resolves the live vehicle bound by vanilla, including citizen-owned bicycles.
+        /// </summary>
+        private static ushort GetPanelVehicleId(VehicleWorldInfoPanel panel)
+        {
+            if (panel != null && InstanceIdField != null)
+            {
+                object panelValue = InstanceIdField.GetValue(panel);
+                if (panelValue is InstanceID)
+                {
+                    InstanceID panelInstance = (InstanceID)panelValue;
+                    if (panelInstance.Type == InstanceType.Vehicle)
+                    {
+                        return panelInstance.Vehicle;
+                    }
+
+                    return 0;
+                }
+            }
+
+            InstanceID selected = WorldInfoPanel.GetCurrentInstanceID();
+            return selected.Type == InstanceType.Vehicle ? selected.Vehicle : (ushort)0;
         }
 
         /// <summary>

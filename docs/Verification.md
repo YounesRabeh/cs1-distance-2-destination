@@ -34,6 +34,7 @@ After each UI or geometry change, test:
 - Every visibility setting, including persistence after restart
 - Panel layout at different UI scales
 - Repeated supported/unsupported target switching with and without extra panel fields
+- Citizen, service, public-transport, tourist, and base vehicle-panel override coverage
 - Disabling a category while its distance row is visible
 - Mod disable/re-enable cleanup
 
