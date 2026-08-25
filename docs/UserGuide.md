@@ -5,7 +5,7 @@
 1. Install Cities: Skylines 1.
 2. Subscribe to **Harmony 2.2.2-0 (Mod Dependency)** on Steam Workshop.
 3. Install Distance 2 Destination.
-4. Open **Content Manager > Mods** and enable **Distance 2 Destination v1.1.0**.
+4. Open **Content Manager > Mods** and enable **Distance 2 Destination v1.1.1**.
 5. Restart the game after replacing a local build of the mod.
 
 Distance 2 Destination includes the small CitiesHarmony API helper, but it does not include the Harmony implementation. Harmony must be installed separately through its Workshop item.
@@ -24,7 +24,7 @@ The field is hidden for idle citizens without a **Going...** activity and for st
 
 ## Settings
 
-Open **Options > Mods Settings > Distance 2 Destination v1.1.0**.
+Open **Options > Mods Settings > Distance 2 Destination v1.1.1**.
 
 The **Show distance for** section contains three independent options, all enabled by default:
 

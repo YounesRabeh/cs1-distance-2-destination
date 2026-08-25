@@ -10,7 +10,7 @@ namespace DistanceToDestination
     /// </summary>
     public sealed class Mod : IUserMod
     {
-        private const string Version = "1.1.0";
+        private const string Version = "1.1.1";
 
         /// <summary>
         /// Gets the versioned name displayed by Content Manager.

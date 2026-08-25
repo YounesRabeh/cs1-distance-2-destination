@@ -241,8 +241,9 @@ namespace DistanceToDestination.Distance
         /// </summary>
         private static bool IsPathIdInRange(uint pathId, PathUnit[] pathBuffer)
         {
-            return pathId != 0 && pathId < (uint)pathBuffer.Length &&
-                   pathId < PathManager.MAX_PATHUNIT_COUNT;
+            // The live buffer can be larger than the vanilla constant when a
+            // compatible path-capacity mod is active, so it is authoritative.
+            return pathId != 0 && pathId < (uint)pathBuffer.Length;
         }
 
         /// <summary>
