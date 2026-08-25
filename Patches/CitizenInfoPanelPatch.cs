@@ -28,11 +28,31 @@ namespace DistanceToDestination.Patches
         private static float nextRefreshTime;
 
         /// <summary>
+        /// Restores the vanilla panel baseline before vanilla refreshes its bindings.
+        /// </summary>
+        [HarmonyPrefix]
+        private static void Prefix(CitizenWorldInfoPanel __instance)
+        {
+            try
+            {
+                if (__instance != null && __instance.component != null)
+                {
+                    Label.PrepareForVanillaRefresh(__instance.component);
+                }
+            }
+            catch (Exception exception)
+            {
+                PathDistanceCalculator.LogUnexpected(exception);
+            }
+        }
+
+        /// <summary>
         /// Updates the selected pedestrian's distance row after vanilla refreshes the panel.
         /// </summary>
         [HarmonyPostfix]
         private static void Postfix(CitizenWorldInfoPanel __instance)
         {
+            bool activePathConfirmed = false;
             try
             {
                 if (__instance == null || __instance.component == null ||
@@ -55,9 +75,11 @@ namespace DistanceToDestination.Patches
                     return;
                 }
 
+                uint citizenId = selected.Citizen;
+                ushort instanceId = GetCitizenInstance(citizenId);
                 UILabel status = __instance.Find<UILabel>("Status");
-                if (status == null || string.IsNullOrEmpty(status.text) ||
-                    !status.text.StartsWith("Going", StringComparison.OrdinalIgnoreCase))
+                if (status == null ||
+                    !PathDistanceCalculator.SupportsCitizenWithActivePath(instanceId))
                 {
                     Label.Remove();
                     lastCitizenId = 0;
@@ -65,7 +87,7 @@ namespace DistanceToDestination.Patches
                     return;
                 }
 
-                uint citizenId = selected.Citizen;
+                activePathConfirmed = true;
                 if (citizenId != lastCitizenId)
                 {
                     lastCitizenId = citizenId;
@@ -85,8 +107,6 @@ namespace DistanceToDestination.Patches
                 }
 
                 nextRefreshTime = now + RefreshInterval;
-                ushort instanceId = GetCitizenInstance(citizenId);
-
                 float meters;
                 if (instanceId != 0 &&
                     PathDistanceCalculator.TryGetCitizenRemainingDistance(instanceId, out meters))
@@ -100,7 +120,15 @@ namespace DistanceToDestination.Patches
             }
             catch (Exception exception)
             {
-                Label.SetUnavailable();
+                if (activePathConfirmed)
+                {
+                    Label.SetUnavailable();
+                }
+                else
+                {
+                    Label.Remove();
+                }
+
                 PathDistanceCalculator.LogUnexpected(exception);
             }
         }

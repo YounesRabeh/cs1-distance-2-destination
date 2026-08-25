@@ -1,6 +1,7 @@
 // Owns the game-loading lifecycle for Distance 2 Destination.
 // Applies patches after Harmony is available and removes them when the level is released.
 using CitiesHarmony.API;
+using DistanceToDestination.UI;
 using ICities;
 using UnityEngine;
 
@@ -32,9 +33,16 @@ namespace DistanceToDestination
         /// </summary>
         public override void OnReleased()
         {
-            if (HarmonyHelper.IsHarmonyInstalled)
+            try
             {
-                Patcher.UnpatchAll();
+                if (HarmonyHelper.IsHarmonyInstalled)
+                {
+                    Patcher.UnpatchAll();
+                }
+            }
+            finally
+            {
+                PanelCleanup.CleanupAll();
             }
         }
     }

@@ -21,8 +21,9 @@ The official API produces one expected ICities 1.16/1.17 unification warning; th
 After each UI or geometry change, test:
 
 - Private, cargo, public-transport, and city-service vehicles
-- Walking citizens with **Going...** and idle citizens without it
-- Parked and parking vehicles
+- Walking citizens with active paths in English and non-English game languages
+- Idle or pathless citizens and citizens riding in vehicles
+- Parked, parking, and pathless road vehicles
 - Short and long routes
 - Curved roads, ramps, bridges, and wide intersections
 - Mid-route selection and rerouting
@@ -38,6 +39,7 @@ After each UI or geometry change, test:
 - The panel background extends below the final line.
 - Values generally decrease along an unchanged route.
 - Rerouting replaces the value safely.
-- A temporary unavailable route displays a dash.
+- A temporary read failure on a nonzero active route displays a dash.
+- Entities without an active path do not display a distance row.
 - Unsupported or disabled categories display no distance row.
 - Closing the panel stops refresh work.

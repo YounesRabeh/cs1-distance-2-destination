@@ -5,7 +5,7 @@
 1. Install Cities: Skylines 1.
 2. Subscribe to **Harmony 2.2.2-0 (Mod Dependency)** on Steam Workshop.
 3. Install Distance 2 Destination.
-4. Open **Content Manager > Mods** and enable **Distance 2 Destination v1.1.2**.
+4. Open **Content Manager > Mods** and enable **Distance 2 Destination v1.1.3**.
 5. Restart the game after replacing a local build of the mod.
 
 Distance 2 Destination includes the small CitiesHarmony API helper, but it does not include the Harmony implementation. Harmony must be installed separately through its Workshop item.
@@ -18,13 +18,13 @@ Load a city and select a moving road vehicle or pedestrian. When the selected en
 Distance to destination: 500 m
 ```
 
-The displayed value updates while the entity moves. Values are rounded upward to remain readable. A dash means the game temporarily has no stable route available, which can happen during rerouting or arrival.
+The displayed value updates while the entity moves. Values are rounded upward to remain readable. A dash means an active route temporarily cannot be read, which can happen during rerouting or arrival.
 
-The field is hidden for idle citizens without a **Going...** activity, stationary parked vehicles, and vehicle types that the current route calculator does not support. Unsupported trains, metros, aircraft, ships, helicopters, and monorails therefore keep their original vanilla panel without an unavailable distance row.
+The field is shown from the entity's live route state, so it works independently of the game's language. It is hidden for idle or pathless citizens, citizens riding in vehicles, stationary parked vehicles, pathless road vehicles, and vehicle types that the current calculator does not support. Unsupported trains, metros, aircraft, ships, helicopters, and monorails therefore keep their original vanilla panel without an unavailable distance row.
 
 ## Settings
 
-Open **Options > Mods Settings > Distance 2 Destination v1.1.2**.
+Open **Options > Mods Settings > Distance 2 Destination v1.1.3**.
 
 The **Show distance for** section contains three independent options, all enabled by default:
 
@@ -49,7 +49,7 @@ Confirm that `DistanceToDestination.dll` is inside a DistanceToDestination folde
 
 Check that Distance 2 Destination and Harmony are enabled in Content Manager. Also check the Distance 2 Destination visibility settings for the selected entity type.
 
-The field is intentionally absent when the selected entity has no supported active trip. Near arrival, a temporary dash can appear while the game releases or replaces the route.
+The field is intentionally absent when the selected entity has no supported active path. A temporary dash appears only when a nonzero active path exists but cannot be read safely during rerouting or arrival.
 
 ### The value changes in large steps
 

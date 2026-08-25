@@ -68,9 +68,9 @@ namespace DistanceToDestination.Distance
         }
 
         /// <summary>
-        /// Determines whether the selected vehicle is a live road vehicle supported by the calculator.
+        /// Determines whether the selected vehicle is a supported road vehicle with an active path.
         /// </summary>
-        internal static bool SupportsVehicle(ushort vehicleId)
+        internal static bool SupportsVehicleWithActivePath(ushort vehicleId)
         {
             if (vehicleId == 0 || !Singleton<VehicleManager>.exists)
             {
@@ -81,7 +81,29 @@ namespace DistanceToDestination.Distance
             return manager != null && manager.m_vehicles != null &&
                    manager.m_vehicles.m_buffer != null &&
                    vehicleId < manager.m_vehicles.m_buffer.Length &&
-                   IsSupportedVehicle(manager.m_vehicles.m_buffer[vehicleId]);
+                   IsSupportedVehicle(manager.m_vehicles.m_buffer[vehicleId]) &&
+                   manager.m_vehicles.m_buffer[vehicleId].m_path != 0;
+        }
+
+        /// <summary>
+        /// Determines whether the selected citizen instance is walking on an active path.
+        /// </summary>
+        internal static bool SupportsCitizenWithActivePath(ushort citizenInstanceId)
+        {
+            if (citizenInstanceId == 0 || !Singleton<CitizenManager>.exists)
+            {
+                return false;
+            }
+
+            CitizenManager manager = Singleton<CitizenManager>.instance;
+            return manager != null && manager.m_instances != null &&
+                   manager.m_instances.m_buffer != null &&
+                   citizenInstanceId < manager.m_instances.m_buffer.Length &&
+                   IsSupportedCitizenInstance(
+                       manager.m_instances.m_buffer[citizenInstanceId],
+                       citizenInstanceId,
+                       manager) &&
+                   manager.m_instances.m_buffer[citizenInstanceId].m_path != 0;
         }
 
         /// <summary>

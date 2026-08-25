@@ -15,11 +15,11 @@ The main components are:
 
 ## Supported entities
 
-Vehicles must be created, spawned road vehicles. A trailer or consist member is resolved to the first vehicle that owns the route.
+Vehicles must be created, spawned road vehicles with a nonzero active path. A trailer or consist member is resolved to the first vehicle that owns the route.
 
 Citizens must have a live walking `CitizenInstance`, must be on a path, and must not be entering or riding a vehicle. Embedded citizen panels inside private-vehicle windows are ignored.
 
-The citizen field is shown only while the vanilla activity starts with **Going**. The vehicle field is removed for a stationary parking vehicle.
+Visibility is determined from simulation state rather than localized panel text. Citizens require a live walking instance with `OnPath`, a nonzero path, and no active vehicle. The vehicle field is removed for stationary parking vehicles and road vehicles without an active path.
 
 ## Existing-path traversal
 
@@ -65,5 +65,5 @@ Distance 2 Destination ships `CitiesHarmony.API.dll` but not the Harmony impleme
 ## Known limitations
 
 - AI-specific intersection connectors are approximated because their generated curves are not stored in `PathUnit`.
-- The game may release a route shortly before changing its visible activity, producing a temporary dash near arrival.
+- A nonzero active route that cannot be captured consistently may produce a temporary dash during rerouting or arrival; entities without an active path do not receive a row.
 - The implementation is verified against Cities: Skylines 1.21.1-f9; another assembly layout requires compatibility testing.

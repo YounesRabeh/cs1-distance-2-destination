@@ -23,11 +23,31 @@ namespace DistanceToDestination.Patches
         private static float nextRefreshTime;
 
         /// <summary>
+        /// Restores the vanilla panel baseline before vanilla refreshes its bindings.
+        /// </summary>
+        [HarmonyPrefix]
+        private static void Prefix(VehicleWorldInfoPanel __instance)
+        {
+            try
+            {
+                if (__instance != null && __instance.component != null)
+                {
+                    Label.PrepareForVanillaRefresh(__instance.component);
+                }
+            }
+            catch (Exception exception)
+            {
+                PathDistanceCalculator.LogUnexpected(exception);
+            }
+        }
+
+        /// <summary>
         /// Updates the selected vehicle's distance row after vanilla refreshes the panel.
         /// </summary>
         [HarmonyPostfix]
         private static void Postfix(VehicleWorldInfoPanel __instance)
         {
+            bool activePathConfirmed = false;
             try
             {
                 if (__instance == null || __instance.component == null ||
@@ -49,10 +69,9 @@ namespace DistanceToDestination.Patches
                 vehicleId = GetFirstVehicle(vehicleId);
                 UILabel status = __instance.Find<UILabel>("Status");
 
-                if (vehicleId == 0 || !PathDistanceCalculator.SupportsVehicle(vehicleId) ||
-                    IsParkedVehicle(
-                    vehicleId,
-                    status == null ? null : status.text))
+                if (vehicleId == 0 ||
+                    !PathDistanceCalculator.SupportsVehicleWithActivePath(vehicleId) ||
+                    IsParkedVehicle(vehicleId))
                 {
                     Label.Remove();
                     lastVehicleId = vehicleId;
@@ -60,6 +79,7 @@ namespace DistanceToDestination.Patches
                     return;
                 }
 
+                activePathConfirmed = true;
                 if (vehicleId != lastVehicleId)
                 {
                     lastVehicleId = vehicleId;
@@ -93,7 +113,15 @@ namespace DistanceToDestination.Patches
             }
             catch (Exception exception)
             {
-                Label.SetUnavailable();
+                if (activePathConfirmed)
+                {
+                    Label.SetUnavailable();
+                }
+                else
+                {
+                    Label.Remove();
+                }
+
                 PathDistanceCalculator.LogUnexpected(exception);
             }
         }
@@ -140,9 +168,9 @@ namespace DistanceToDestination.Patches
         }
 
         /// <summary>
-        /// Detects a stationary vehicle whose flags or visible status indicate parking.
+        /// Detects a stationary vehicle whose simulation flags indicate parking.
         /// </summary>
-        private static bool IsParkedVehicle(ushort vehicleId, string statusText)
+        private static bool IsParkedVehicle(ushort vehicleId)
         {
             if (vehicleId == 0 || !ColossalFramework.Singleton<VehicleManager>.exists)
             {
@@ -161,9 +189,7 @@ namespace DistanceToDestination.Patches
             Vector3 velocity = vehicle.GetLastFrameVelocity();
             bool isStationary = velocity.sqrMagnitude <= StationaryVelocitySquared;
             bool isParking = (vehicle.m_flags & Vehicle.Flags.Parking) != 0;
-            bool statusSaysParked = !string.IsNullOrEmpty(statusText) &&
-                                    statusText.IndexOf("Parked", StringComparison.OrdinalIgnoreCase) >= 0;
-            return isStationary && (isParking || statusSaysParked);
+            return isStationary && isParking;
         }
     }
 }

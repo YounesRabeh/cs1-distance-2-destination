@@ -43,7 +43,7 @@ artifacts/bin/Release
 
 The output contains `DistanceToDestination.dll`, symbols when available, and `CitiesHarmony.API.dll`. It must not contain game assemblies or `CitiesHarmony.Harmony.dll`.
 
-The local build-and-install script also creates a versioned Workshop upload folder and ZIP archive under `artifacts/workshop`, for example `DistanceToDestination-v1.1.2` and `DistanceToDestination-v1.1.2.zip`. The DLL names inside remain unversioned because the game expects stable assembly names.
+The local build-and-install script also creates a versioned Workshop upload folder and ZIP archive under `artifacts/workshop`, for example `DistanceToDestination-v1.1.3` and `DistanceToDestination-v1.1.3.zip`. The DLL names inside remain unversioned because the game expects stable assembly names.
 
 ## Local build and installation
 

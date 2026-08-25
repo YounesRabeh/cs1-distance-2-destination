@@ -2,7 +2,7 @@
 // Centralizes UI cleanup so disabling the mod restores vanilla panels.
 using System;
 using HarmonyLib;
-using DistanceToDestination.Patches;
+using DistanceToDestination.UI;
 using UnityEngine;
 
 namespace DistanceToDestination
@@ -47,7 +47,7 @@ namespace DistanceToDestination
                 }
 
                 patched = !cleanupSucceeded;
-                CleanupLabels();
+                PanelCleanup.CleanupAll();
                 Debug.LogError("[Distance 2 Destination] Failed to apply Harmony patches");
                 Debug.LogException(exception);
             }
@@ -58,14 +58,13 @@ namespace DistanceToDestination
         /// </summary>
         internal static void UnpatchAll()
         {
-            if (!patched)
-            {
-                CleanupLabels();
-                return;
-            }
-
             try
             {
+                if (!patched)
+                {
+                    return;
+                }
+
                 new Harmony(HarmonyId).UnpatchAll(HarmonyId);
                 patched = false;
                 Debug.Log("[Distance 2 Destination] Harmony patches removed");
@@ -75,30 +74,9 @@ namespace DistanceToDestination
                 Debug.LogError("[Distance 2 Destination] Failed to remove Harmony patches");
                 Debug.LogException(exception);
             }
-            CleanupLabels();
-        }
-
-        /// <summary>
-        /// Removes UI owned by both panel patches while isolating cleanup failures.
-        /// </summary>
-        private static void CleanupLabels()
-        {
-            try
+            finally
             {
-                VehicleInfoPanelPatch.Cleanup();
-            }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception);
-            }
-
-            try
-            {
-                CitizenInfoPanelPatch.Cleanup();
-            }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception);
+                PanelCleanup.CleanupAll();
             }
         }
     }

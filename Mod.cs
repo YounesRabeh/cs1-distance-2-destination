@@ -1,6 +1,7 @@
 // Declares the mod metadata shown by Cities: Skylines.
 // Ensures the shared Harmony dependency is initialized before gameplay loading begins.
 using CitiesHarmony.API;
+using DistanceToDestination.UI;
 using ICities;
 
 namespace DistanceToDestination
@@ -10,7 +11,7 @@ namespace DistanceToDestination
     /// </summary>
     public sealed class Mod : IUserMod
     {
-        private const string Version = "1.1.2";
+        private const string Version = "1.1.3";
 
         /// <summary>
         /// Gets the versioned name displayed by Content Manager.
@@ -42,9 +43,16 @@ namespace DistanceToDestination
         /// </summary>
         public void OnDisabled()
         {
-            if (HarmonyHelper.IsHarmonyInstalled)
+            try
             {
-                Patcher.UnpatchAll();
+                if (HarmonyHelper.IsHarmonyInstalled)
+                {
+                    Patcher.UnpatchAll();
+                }
+            }
+            finally
+            {
+                PanelCleanup.CleanupAll();
             }
         }
 
