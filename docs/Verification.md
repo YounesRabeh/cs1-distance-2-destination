@@ -23,7 +23,7 @@ After each UI or geometry change, test:
 - Private, cargo, public-transport, city-service, and bicycle vehicles
 - Active and pathless bicycles with After Dark, plus loading without the DLC
 - Bicycle visibility under All other vehicles with Pedestrians enabled and disabled
-- Walking citizens with active paths in English and non-English game languages
+- Walking residents, students, and tourists with active paths in English and non-English game languages
 - Idle or pathless citizens and citizens riding in vehicles
 - Parked, parking, and pathless road vehicles
 - Short and long routes

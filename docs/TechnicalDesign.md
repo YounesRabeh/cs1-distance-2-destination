@@ -52,7 +52,7 @@ The accumulated value uses game world units as metres. Unit selection affects fo
 
 ## Display and refresh
 
-Harmony postfixes run after vanilla updates a concrete vehicle panel or `CitizenWorldInfoPanel`. Vehicle overrides and their nested base calls are depth-tracked so layout runs once, after the outermost panel has finished binding all vanilla fields. Each patch verifies that its own top-level panel and selected entity match before attaching UI. Its prefix also releases layout owned by the other top-level panel type before vanilla and other panel mods recalculate heights; this prevents stale vehicle or citizen sizing from crossing a selection change.
+Harmony postfixes run after vanilla updates a concrete vehicle panel, `CitizenWorldInfoPanel`, or `TouristWorldInfoPanel`. Vehicle overrides and their nested base calls are depth-tracked so layout runs once, after the outermost panel has finished binding all vanilla fields. Each patch verifies that its own top-level panel and selected entity match before attaching UI. Its prefix also releases layout owned by the other top-level panel type before vanilla and other panel mods recalculate heights; this prevents stale vehicle or citizen sizing from crossing a selection change.
 
 The distance row is a sibling below the vanilla Status row. Its height comes from the styled Status label rather than a potentially enlarged parent. The label records its exact container and window growth; refresh and cleanup subtract only that owned growth so repeated target changes cannot accumulate padding and unrelated UI additions remain intact.
 
@@ -66,4 +66,6 @@ Distance 2 Destination ships `CitiesHarmony.API.dll` but not the Harmony impleme
 
 - AI-specific intersection connectors are approximated because their generated curves are not stored in `PathUnit`.
 - A nonzero active route that cannot be captured consistently may produce a temporary dash during rerouting or arrival; entities without an active path do not receive a row.
+- `RacePersonWorldInfoPanel` reports progress around an event track rather than a normal destination path and is intentionally unsupported.
+- Transient entities shown by `ServicePersonWorldInfoPanel` use a direct `CitizenInstance` selection instead of the persistent citizen identity required by the pedestrian calculator; they remain unsupported pending separate route-state validation.
 - The implementation is verified against Cities: Skylines 1.21.1-f9; another assembly layout requires compatibility testing.

@@ -1,6 +1,7 @@
 // Adds a route-distance row to top-level moving-citizen information panels.
 // Ignores embedded owner panels so vehicle windows never receive a duplicate label.
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using ColossalFramework;
 using ColossalFramework.UI;
@@ -14,7 +15,7 @@ namespace DistanceToDestination.Patches
     /// <summary>
     /// Refreshes the citizen distance row after vanilla binds its information panel.
     /// </summary>
-    [HarmonyPatch(typeof(CitizenWorldInfoPanel), "UpdateBindings")]
+    [HarmonyPatch]
     internal static class CitizenInfoPanelPatch
     {
         private const float RefreshInterval = 0.75f;
@@ -28,10 +29,32 @@ namespace DistanceToDestination.Patches
         private static float nextRefreshTime;
 
         /// <summary>
+        /// Selects every concrete vanilla pedestrian panel that owns citizen bindings.
+        /// </summary>
+        private static IEnumerable<MethodBase> TargetMethods()
+        {
+            Type[] panelTypes =
+            {
+                typeof(CitizenWorldInfoPanel),
+                typeof(TouristWorldInfoPanel)
+            };
+
+            HashSet<MethodBase> methods = new HashSet<MethodBase>();
+            for (int index = 0; index < panelTypes.Length; index++)
+            {
+                MethodInfo method = AccessTools.DeclaredMethod(panelTypes[index], "UpdateBindings");
+                if (method != null && methods.Add(method))
+                {
+                    yield return method;
+                }
+            }
+        }
+
+        /// <summary>
         /// Restores the vanilla panel baseline before vanilla refreshes its bindings.
         /// </summary>
         [HarmonyPrefix]
-        private static void Prefix(CitizenWorldInfoPanel __instance)
+        private static void Prefix(HumanWorldInfoPanel __instance)
         {
             try
             {
@@ -58,7 +81,7 @@ namespace DistanceToDestination.Patches
         /// Updates the selected pedestrian's distance row after vanilla refreshes the panel.
         /// </summary>
         [HarmonyPostfix]
-        private static void Postfix(CitizenWorldInfoPanel __instance)
+        private static void Postfix(HumanWorldInfoPanel __instance)
         {
             bool activePathConfirmed = false;
             try
@@ -155,7 +178,7 @@ namespace DistanceToDestination.Patches
         /// Verifies that a panel is non-embedded and bound to the currently selected citizen.
         /// </summary>
         private static bool RepresentsCurrentTopLevelCitizen(
-            CitizenWorldInfoPanel panel,
+            HumanWorldInfoPanel panel,
             InstanceID selected)
         {
             if (selected.Type != InstanceType.Citizen || selected.Citizen == 0 ||

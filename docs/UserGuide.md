@@ -5,14 +5,14 @@
 1. Install Cities: Skylines 1.
 2. Subscribe to **Harmony 2.2.2-0 (Mod Dependency)** on Steam Workshop.
 3. Install Distance 2 Destination.
-4. Open **Content Manager > Mods** and enable **Distance 2 Destination v1.1.6**.
+4. Open **Content Manager > Mods** and enable **Distance 2 Destination v1.1.7**.
 5. Restart the game after replacing a local build of the mod.
 
 Distance 2 Destination includes the small CitiesHarmony API helper, but it does not include the Harmony implementation. Harmony must be installed separately through its Workshop item.
 
 ## Showing a distance
 
-Load a city and select a moving road vehicle, bicycle, or pedestrian. When the selected entity has an active route, its information window displays:
+Load a city and select a moving road vehicle, bicycle, resident pedestrian, or tourist pedestrian. When the selected entity has an active route, its information window displays:
 
 ```text
 Distance to destination: 500 m
@@ -26,13 +26,13 @@ Bicycle support is automatically available with After Dark. The mod has no DLC d
 
 ## Settings
 
-Open **Options > Mods Settings > Distance 2 Destination v1.1.6**.
+Open **Options > Mods Settings > Distance 2 Destination v1.1.7**.
 
 The **Show distance for** section contains three independent options, all enabled by default:
 
 - **Service vehicles**
 - **All other vehicles**, including bicycles
-- **Pedestrians**
+- **Pedestrians**, including residents, students, and tourists
 
 The **Units** section offers:
 
