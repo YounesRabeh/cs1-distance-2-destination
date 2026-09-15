@@ -66,6 +66,6 @@ Distance 2 Destination ships `CitiesHarmony.API.dll` but not the Harmony impleme
 
 - AI-specific intersection connectors are approximated because their generated curves are not stored in `PathUnit`.
 - A nonzero active route that cannot be captured consistently may produce a temporary dash during rerouting or arrival; entities without an active path do not receive a row.
-- `RacePersonWorldInfoPanel` reports progress around an event track rather than a normal destination path and is intentionally unsupported.
+- Race-person and race-vehicle panels report progress around an event track rather than a normal destination path and are intentionally unsupported.
 - Transient entities shown by `ServicePersonWorldInfoPanel` use a direct `CitizenInstance` selection instead of the persistent citizen identity required by the pedestrian calculator; they remain unsupported pending separate route-state validation.
 - The implementation is verified against Cities: Skylines 1.21.1-f9; another assembly layout requires compatibility testing.

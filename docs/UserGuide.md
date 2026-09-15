@@ -5,7 +5,7 @@
 1. Install Cities: Skylines 1.
 2. Subscribe to **Harmony 2.2.2-0 (Mod Dependency)** on Steam Workshop.
 3. Install Distance 2 Destination.
-4. Open **Content Manager > Mods** and enable **Distance 2 Destination v1.1.7**.
+4. Open **Content Manager > Mods** and enable **Distance 2 Destination v1.1.8**.
 5. Restart the game after replacing a local build of the mod.
 
 Distance 2 Destination includes the small CitiesHarmony API helper, but it does not include the Harmony implementation. Harmony must be installed separately through its Workshop item.

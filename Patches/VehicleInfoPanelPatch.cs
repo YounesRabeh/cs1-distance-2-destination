@@ -203,6 +203,14 @@ namespace DistanceToDestination.Patches
         /// </summary>
         private static bool ShouldShowForPanel(VehicleWorldInfoPanel panel)
         {
+            // Race paths represent circuit progress, not a trip to a destination.
+            // The base VehicleWorldInfoPanel method is also patched, so excluding
+            // RaceVehicleWorldInfoPanel from TargetMethods alone would not be enough.
+            if (panel is RaceVehicleWorldInfoPanel)
+            {
+                return false;
+            }
+
             return panel is CityServiceVehicleWorldInfoPanel
                 ? ModSettings.ShowServiceVehicles
                 : ModSettings.ShowOtherVehicles;
