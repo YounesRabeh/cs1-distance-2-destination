@@ -1,5 +1,7 @@
 # Verification checklist
 
+[< Back to Distance 2 Destination](../README.md) • [Documentation Hub](README.md)
+
 ## Automated and static checks
 
 The current Release build has been checked for:

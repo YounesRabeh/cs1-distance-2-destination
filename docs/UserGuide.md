@@ -1,5 +1,7 @@
 # User guide
 
+[< Back to Distance 2 Destination](../README.md) • [Documentation Hub](README.md)
+
 ## Installation
 
 1. Install Cities: Skylines 1.
@@ -26,7 +28,7 @@ Bicycle support is automatically available with After Dark. The mod has no DLC d
 
 ## Settings
 
-Open **Options > Mods Settings > Distance 2 Destination v1.1.7**.
+Open **Options > Mods Settings > Distance 2 Destination v1.1.8**.
 
 The **Show distance for** section contains three independent options, all enabled by default:
 
