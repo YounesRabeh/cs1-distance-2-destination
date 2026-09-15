@@ -1,5 +1,8 @@
-<a href="https://github.com/YounesRabeh/cs1-distance-2-destination"><img src="assets/Distance2Destination-thumbnail-text-only.png" alt="Distance 2 Destination" width="100%"></a>
-
+<p align="center">
+  <a href="https://github.com/YounesRabeh/cs1-distance-2-destination">
+    <img src="assets/Distance2Destination-thumbnail-text-only.png" alt="Distance 2 Destination" width="50%">
+  </a>
+</p>
 <div align="center">
 
   <p align="center">
