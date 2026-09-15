@@ -41,7 +41,7 @@ Runtime screenshots are not currently included in the repository.
 1. Install Cities: Skylines 1 version 1.21.1-f9 or later.
 2. Subscribe to [Harmony 2.2.2-0 (Mod Dependency)](https://steamcommunity.com/sharedfiles/filedetails/?id=2040656402); Distance 2 Destination does not include Harmony itself.
 3. Install [Distance 2 Destination from the Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3789370121).
-4. In **Content Manager > Mods**, enable **Distance 2 Destination v1.1.8**, load a city, and select a moving road vehicle, bicycle, or pedestrian.
+4. In **Content Manager > Mods**, enable **Distance 2 Destination vx.x.x**, load a city, and select a moving road vehicle, bicycle, or pedestrian.
 
 ### Configuration overview
 

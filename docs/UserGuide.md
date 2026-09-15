@@ -28,7 +28,7 @@ Bicycle support is automatically available with After Dark. The mod has no DLC d
 
 ## Settings
 
-Open **Options > Mods Settings > Distance 2 Destination v1.1.8**.
+Open **Options > Mods Settings > Distance 2 Destination vx.x.x**.
 
 The **Show distance for** section contains three independent options, all enabled by default:
 
